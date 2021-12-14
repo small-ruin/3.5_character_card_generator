@@ -24,9 +24,9 @@ export default class Class {
     }) {
         this.name = name
         this.hitDice = hitDice,
-        this.fontSave = refSave
-        this.willSave = willSave
         this.fortSave = fortSave
+        this.refSave = refSave
+        this.willSave = willSave
         this.bab = bab
         this.skills = skills
         this.skillPointsEachLevel = skillPointsEachLevel
@@ -275,4 +275,8 @@ export const classes = {
             Concentration, Craft, DecipherScript, ...allKnowledges, Profession,
         ]
     })
+}
+
+export function getClassByName(name) {
+    return Object.values(classes).find(c => c.name === name)
 }

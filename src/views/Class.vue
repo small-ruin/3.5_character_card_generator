@@ -1,30 +1,37 @@
 <script setup>
 import { computed, ref } from "@vue/reactivity";
 import Class, { allSkills, BabType, SaveType, classes } from '../core/Class'
+import { useModelWrapper } from '../hooks/useModelWrapper'
+
+const props = defineProps({
+    modelValue: Object,
+})
+const emit = defineEmits(['update:modelValue'])
 
 const addClassDialogVisible = ref(false)
 const currentAddingClass = ref({})
 const customClass = ref([])
-const characterClasses = ref([{}])
 const classOptions = computed(
     () => Object.values(classes)
         .map(cl => ({label: cl.name, value: cl.name}))
         .concat(customClass.value.map(i => ({label: i.name, value: i.name})))
 )
 
+useModelWrapper(props, emit)
+
 function addClass() {
     const newClass = new Class(currentAddingClass.value.name, currentAddingClass.value)
     customClass.value.push(newClass)
-    currentAddingClass.value = {}
+    currentAddingClass.value = { level: 1 }
     addClassDialogVisible.value = false
 }
 </script>
 
 <template>
     <a-button @click="() => addClassDialogVisible = true">添加职业模版</a-button>
-    <a-button @click="() => characterClasses.push({})">添加人物职业</a-button>
+    <a-button @click="() => props.modelValue.push({ level: 1 })">添加人物职业</a-button>
 
-    <div v-for="(c, i) in characterClasses" :key="i">
+    <div v-for="(c, i) in props.modelValue" :key="i">
         <a-form-item>
             <a-select v-model:value="c.name" show-search :options="classOptions">
             </a-select>
