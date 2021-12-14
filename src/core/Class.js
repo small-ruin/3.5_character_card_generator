@@ -62,11 +62,11 @@ const RoyalKnowledge = new Skill('知识(贵族与皇室)', Abilities.INT, false
 const ReligionKnowledge = new Skill('知识(宗教)', Abilities.INT, false)
 const PlaneKnowledge = new Skill('知识(位面)', Abilities.INT, false)
 const Listen = new Skill('聆听', Abilities.WIS, true)
-const MoveSilently = new Skill('潜行', Abilities.Dex, true, { armor: 1 })
-const OpenLock = new Skill('开锁', Abilities.Dex, false)
+const MoveSilently = new Skill('潜行', Abilities.DEX, true, { armor: 1 })
+const OpenLock = new Skill('开锁', Abilities.DEX, false)
 const Perform = new Skill('表演', Abilities.CHA, true)
 const Profession = new Skill('专业', Abilities.WIS, false)
-const Ride = new Skill('骑术', Abilities.Dex, true)
+const Ride = new Skill('骑术', Abilities.DEX, true)
 const Search = new Skill('搜索', Abilities.INT, true)
 const SenseMotive = new Skill('察言观色', Abilities.WIS, true)
 const SleightOfHand = new Skill('手上功夫', Abilities.DEX, false, { armor: 1 })
@@ -139,6 +139,10 @@ export const allSkills = [
     UseMagicDevice,
     UseRope ,
 ]
+
+const allSkillMap = {}
+allSkills.forEach(s => allSkillMap[s.name] = s)
+export const allSkillsMap = allSkillMap;
 
 export const classes = {
     barbarian: new Class('野蛮人', {

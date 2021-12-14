@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
-import CharacterClass, { getClassByName, SaveType } from './core/Class'
+import { message } from 'ant-design-vue';
+import CharacterClass, { getClassByName, SaveType, allSkills } from './core/Class'
 import Class from './views/Class.vue'
 
 const aligns = [
@@ -17,17 +18,31 @@ const aligns = [
 
 const form = ref({
   class: [],
+  skills: {},
   STRENGTH: 10,
   DEXTERITY: 10,
   CONSTITUTION: 10,
   INTELLIGENCE: 10,
   WISDOM: 10,
   CHARISMA: 10,
+  raceSkillPoint: 0,
+})
+
+const computeAbilityModify = ability => Math.floor((ability - 10) / 2)
+const abilityModifiers = computed(() => {
+  return {
+      STRENGTH: computeAbilityModify(form.value['STRENGTH']),
+      DEXTERITY: computeAbilityModify(form.value['DEXTERITY']),
+      CONSTITUTION: computeAbilityModify(form.value['CONSTITUTION']),
+      INTELLIGENCE: computeAbilityModify(form.value['INTELLIGENCE']),
+      WISDOM: computeAbilityModify(form.value['WISDOM']),
+      CHARISMA: computeAbilityModify(form.value['CHARISMA']),
+  }
 })
 
 const characterClasses = ref([{ level: 1 }])
 
-const activeKey = ref(['base', 'class', 'abilities'])
+const activeKey = ref(['base', 'class', 'abilities', 'skills'])
 
 function safeGetClass(c) {
     if (!c.name) return null
@@ -63,6 +78,58 @@ const bab = computed(() => characterClasses.value.reduce((p, c) => {
 const fortSave = createSaveComputed('fortSave')
 const refSave = createSaveComputed('refSave')
 const willSave = createSaveComputed('willSave')
+
+const skillMax = computed(() => characterClasses.value.reduce((p, c) => p + c.level || 0, 3))
+
+const classSkills = computed(() => {
+  const rst = {}
+
+  characterClasses.value.forEach(c => {
+    c = safeGetClass(c)
+    c && c.skills.forEach(s => {
+      if (!rst[s.name]) {
+        rst[s.name] = true
+      }
+    })
+  })
+
+  return rst
+})
+
+const skillPoints = computed(() => {
+  let points = 0
+  let classes = characterClasses.value.slice()
+  let firstClass = classes.shift()
+  firstClass = safeGetClass(firstClass)
+  if (!firstClass) return 0
+  else points = (
+    firstClass.skillPointsEachLevel +
+    abilityModifiers.value.INTELLIGENCE +
+    form.value.raceSkillPoint
+  ) * (firstClass.level + 3)
+
+  classes.forEach(c => {
+    c = safeGetClass(c)
+    if (c) {
+      points += (c.skillPointsEachLevel +
+        abilityModifiers.value.INTELLIGENCE +
+        form.value.raceSkillPoint) * c.level
+    }
+  })
+
+  return points
+})
+
+const usedSkillPoints = computed(() => {
+  return Object.values(form.value.skills).reduce((p, c) => p + c, 0)
+})
+
+function handleSkillInputChange(p, skill) {
+  if (skillPoints.value - usedSkillPoints.value < 0) {
+    message.error('没有技能点了')
+    form.value.skills[skill.name] = p - 1
+  }
+}
 </script>
 
 <template>
@@ -102,7 +169,21 @@ const willSave = createSaveComputed('willSave')
         </a-form>
       </a-collapse-panel>
       <a-collapse-panel key="skills" header="技能">
-
+        <a-form-item>剩余技能点数：{{skillPoints - usedSkillPoints}}</a-form-item>
+        <a-form-item v-for="s in allSkills" :key="s.name" :label="s.name">
+            <span v-if="s.name in classSkills">本职技能</span>
+            <a-input-number
+              v-model:value="form.skills[s.name]"
+              @change="v => handleSkillInputChange(v, s)"
+              :max="skillMax"
+              :min="0"
+              ></a-input-number>
+            <span>{{s.getPoint(
+              abilityModifiers,
+              form.skills[s.name] || 0,
+              classSkills[s.name]
+            )}}</span>
+        </a-form-item>
       </a-collapse-panel>
       <a-collapse-panel key="fate" header="专长">
 

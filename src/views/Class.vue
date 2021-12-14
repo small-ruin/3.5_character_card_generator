@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from "@vue/reactivity";
-import Class, { allSkills, BabType, SaveType, classes } from '../core/Class'
+import Class, { allSkills, BabType, SaveType, classes, allSkillsMap } from '../core/Class'
 import { useModelWrapper } from '../hooks/useModelWrapper'
 
 const props = defineProps({
@@ -20,6 +20,7 @@ const classOptions = computed(
 useModelWrapper(props, emit)
 
 function addClass() {
+    currentAddingClass.skills = currentAddingClass.skills.map(i => allSkillsMap[i.name])
     const newClass = new Class(currentAddingClass.value.name, currentAddingClass.value)
     customClass.value.push(newClass)
     currentAddingClass.value = { level: 1 }
