@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { message } from 'ant-design-vue';
+import { getWeightByStr } from './core/Weight'
 import CharacterClass, { getClassByName, SaveType, allSkills } from './core/Class'
 import Class from './views/Class.vue'
 
@@ -26,6 +27,12 @@ const form = ref({
   WISDOM: 10,
   CHARISMA: 10,
   raceSkillPoint: 0,
+  fates: [{}],
+  items: [{}],
+  pp: 0,
+  gp: 0,
+  sp: 0,
+  cp: 0,
 })
 
 const computeAbilityModify = ability => Math.floor((ability - 10) / 2)
@@ -42,7 +49,7 @@ const abilityModifiers = computed(() => {
 
 const characterClasses = ref([{ level: 1 }])
 
-const activeKey = ref(['base', 'class', 'abilities', 'skills'])
+const activeKey = ref(['base', 'class', 'abilities', 'skills', 'fates', 'items'])
 
 function safeGetClass(c) {
     if (!c.name) return null
@@ -130,6 +137,35 @@ function handleSkillInputChange(p, skill) {
     form.value.skills[skill.name] = p - 1
   }
 }
+
+// 自动新增一行
+const autoIncrease = (target, key) => {
+  watch(
+    target,
+    () => {
+      if (target.find(t => !t[key])) {
+        return
+      }
+      target.push({})
+    },
+    { deep: true }
+  )
+}
+autoIncrease(form.value.fates, 'name')
+autoIncrease(form.value.items, 'name')
+
+const weightLimit = computed(() => getWeightByStr(form.value.STRENGTH))
+const coinWeight = computed(() => ((form.value.pp + form.value.gp + form.value.sp + form.value.cp) / 50).toFixed(2))
+const weight = computed(() => (
+  form.value.items.reduce((p, c) => p +
+    +(c.weight || 0), 0) +
+    +coinWeight.value).toFixed(2)
+)
+const weightDetail = computed(() => {
+  if (weight.value < weightLimit.value[0]) return '轻载'
+  if (weightLimit.value[0] < weight.value < weightLimit.value[1]) return '中载'
+  if (weight.value > weightLimit.value[2]) return '轻载'
+})
 </script>
 
 <template>
@@ -169,6 +205,12 @@ function handleSkillInputChange(p, skill) {
         </a-form>
       </a-collapse-panel>
       <a-collapse-panel key="skills" header="技能">
+        <a-form-item label="种族奖励技能点">
+            <a-input-number
+              v-model:value="form.raceSkillPoint"
+              :min="0"
+              ></a-input-number>
+        </a-form-item>
         <a-form-item>剩余技能点数：{{skillPoints - usedSkillPoints}}</a-form-item>
         <a-form-item v-for="s in allSkills" :key="s.name" :label="s.name">
             <span v-if="s.name in classSkills">本职技能</span>
@@ -186,9 +228,30 @@ function handleSkillInputChange(p, skill) {
         </a-form-item>
       </a-collapse-panel>
       <a-collapse-panel key="fate" header="专长">
-
+        <a-form-item v-for="(f, i) in form.fates" :key="i">
+          <a-input placeholder="专长名" v-model:value="f.name" />
+          <a-textarea placeholder="专长描述(非必填)" v-model:value="f.describe"></a-textarea>
+        </a-form-item>
       </a-collapse-panel>
       <a-collapse-panel key="items" header="物品">
+        <a-form-item v-for="(it, i) in form.items" :key="i">
+          <a-input placeholder="物品名称" v-model:value="it.name" />
+          <a-input placeholder="价格" v-model:value="it.price"></a-input>
+          <a-input placeholder="重量" v-model:value="it.weight"></a-input>
+          <a-textarea placeholder="备注" v-model:value="it.remark"></a-textarea>
+        </a-form-item>
+        <a-form-item :label="p" :key="p" v-for="p in ['pp', 'gp', 'sp', 'cp']">
+          <a-input-number :min="0" v-model:value="form[p]"></a-input-number>
+        </a-form-item>
+        <a-form-item>
+          货币：{{form.pp + form.gp + form.sp + form.cp}}枚，
+          {{(form.pp * 10 + form.gp + form.sp / 10 + form.cp / 100).toFixed(2)}}gp，
+          {{coinWeight}}磅
+        </a-form-item>
+        <a-form-item>
+          <p>负重：{{weight}}磅, {{weightDetail}}</p>
+          轻载：{{'<' + weightLimit[0]}} 中载：{{'<' + (weightLimit[1] + 1)}} 重载：{{'>' + weightLimit[2]}}
+        </a-form-item>
 
       </a-collapse-panel>
       <a-collapse-panel key="spell" header="法术">
