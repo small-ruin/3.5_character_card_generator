@@ -1,4 +1,4 @@
-class Template {
+export default class Template {
     allVars = new Set()
     loopVars = new Set()
     buffered = []
