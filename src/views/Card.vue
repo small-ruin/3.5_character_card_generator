@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, watchEffect } from "vue";
 import { message } from 'ant-design-vue';
-import { getWeightByStr, aligns, sizes, SaveType, allSkills  } from '../core'
+import { getWeightByStr, aligns, sizes, sizeModifyMap, SaveType, allSkills  } from '../core'
 import CharacterClass, { getClassByName } from '../core/Class'
 import Class from './Class.vue'
 
@@ -13,7 +13,6 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const form = useModelWrapper(props, emit)
-const characterClasses = computed(() => form.value.class)
 
 const abilityModifiers = computed(() => {
   return {
@@ -43,6 +42,9 @@ function safeGetClass(c) {
     }
     return c
 }
+const characterClasses = computed(() => form.value.class.filter(i => i.name).map(c => safeGetClass(c)))
+const level = computed(() => characterClasses.value.reduce((p, c) => p + c.level, 0))
+
 // TODO: create save core model
 function computeSave(saveType, level) {
   if (saveType === SaveType.STRONG) {
@@ -54,14 +56,12 @@ function computeSave(saveType, level) {
   }
 }
 const createSaveComputed = saveName => computed(() => characterClasses.value.reduce((p, c) => {
-  c = safeGetClass(c)
   if (!c) return p
   const rst = p + computeSave(c[saveName], c.level)
   return rst
 }, 0))
 
 const bab = computed(() => characterClasses.value.reduce((p, c) => {
-  c = safeGetClass(c)
   if (!c) return p
   return p + Math.floor(c.level * c.bab)
 }, 0))
@@ -76,8 +76,7 @@ const classSkills = computed(() => {
   const rst = {}
 
   characterClasses.value.forEach(c => {
-    c = safeGetClass(c)
-    c && c.skills.forEach(s => {
+    c.skills.forEach(s => {
       if (!rst[s.name]) {
         rst[s.name] = true
       }
@@ -91,7 +90,6 @@ const skillPoints = computed(() => {
   let points = 0
   let classes = characterClasses.value.slice()
   let firstClass = classes.shift()
-  firstClass = safeGetClass(firstClass)
   if (!firstClass) return 0
   else points = (
     firstClass.skillPointsEachLevel +
@@ -100,12 +98,9 @@ const skillPoints = computed(() => {
   ) * (firstClass.level + 3)
 
   classes.forEach(c => {
-    c = safeGetClass(c)
-    if (c) {
-      points += (c.skillPointsEachLevel +
-        abilityModifiers.value.INTELLIGENCE +
-        form.value.raceSkillPoint) * c.level
-    }
+    points += (c.skillPointsEachLevel +
+      abilityModifiers.value.INTELLIGENCE +
+      form.value.raceSkillPoint) * c.level
   })
 
   return points
@@ -156,13 +151,22 @@ const weightDetail = computed(() => {
   if (weightLimit.value[0] < weight.value < weightLimit.value[1]) return '中载'
   if (weight.value > weightLimit.value[2]) return '轻载'
 })
+const hitPoint = computed(() => {
+  return (form.value.classHitPoint || 0) + form.value.CONSTITUTION.modify * level.value
+})
+const totalAc = computed(() => form.value.ac.armor + form.value.ac.dex + form.value.ac.other + 10)
+const touchAc = computed(() => form.value.ac.dex + 10)
+const flatFootAc = computed(() => form.value.ac.armor + 10 + form.value.ac.other)
+const init = computed(() => form.value.otherInit + form.value.DEXTERITY.modify)
+const grab = computed(() => sizeModifyMap[form.value.size] * 4 + form.value.DEXTERITY.modify + bab.value + form.value.otherGrab)
 
 watchEffect(() => {
   const map = {
     bab, fortSave, refSave, willSave,
     skillMax, skillPoints, usedSkillPoints,
     levelUpExp, weightLimit, coinWeight,
-    weight, weightDetail,
+    weight, weightDetail, level, hitPoint,
+    totalAc, touchAc, flatFootAc, init, grab
   }
   Object.keys(map).forEach(k => form.value.set(k, map[k].value))
 })
@@ -194,10 +198,20 @@ watchEffect(() => {
         </a-form>
       </a-collapse-panel>
       <a-collapse-panel key="class" header="职业">
-        <class v-model="characterClasses" :custom-class="customClass"></class>
+        <class v-model="form.class" :custom-class="customClass"></class>
       </a-collapse-panel>
       <a-collapse-panel key="abilities" header="属性">
         <a-form :model="form">
+          <a-form-item label="生命值">
+            {{hitPoint}}=
+            <a-input-number v-model:value="form.classHitPoint"></a-input-number>{{
+              characterClasses.length
+              ? '(' + characterClasses
+                .reduce((p,c) => p + `${c.level}d${c.hitDice}+`, '')
+                .slice(0, -1) + ')'
+              : ''
+            }}{{form.CONSTITUTION.modify ? `+${form.CONSTITUTION.modify}*${level}` : ''}}
+          </a-form-item>
           <a-form-item label="力量">
             {{form.STRENGTH.ability}}=
             <a-input-number v-model:value="form.STRENGTH.base"/>初始值
@@ -236,7 +250,22 @@ watchEffect(() => {
           </a-form-item>
         
           <a-form-item label="bab">{{bab}}</a-form-item>
-          <a-form-item label="擒抱"></a-form-item>
+          <a-form-item label="ac">
+            {{totalAc}} = 10+
+              <a-input-number v-model:value="form.ac.armor"></a-input-number>盔甲及盾牌+
+              <a-input-number v-model:value="form.ac.dex"></a-input-number>敏捷+
+              <a-input-number v-model:value="form.ac.other"></a-input-number>其它
+              <br />
+            接触：{{touchAc}} 措手不及：{{flatFootAc}}
+          </a-form-item>
+          <a-form-item label="先攻">
+            {{init}}={{form.DEXTERITY.modify}}敏捷
+            +<a-input-number v-model:value="form.otherInit"></a-input-number>其它
+          </a-form-item>
+          <a-form-item label="擒抱">
+            {{grab}}={{bab}}bab+{{form.STRENGTH.modify}}力量+{{sizeModifyMap[form.size] * 4}}体型+
+          <a-input-number v-model:value="form.otherGrab"></a-input-number>其它
+          </a-form-item>
           <a-form-item label="强韧检定">{{fortSave}}</a-form-item>
           <a-form-item label="反射检定">{{refSave}}</a-form-item>
           <a-form-item label="意志检定">{{willSave}}</a-form-item>

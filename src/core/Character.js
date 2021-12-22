@@ -39,6 +39,7 @@ export default class Character {
     align = null
     size = 'medium'
     level = 0
+    classHitPoint = 0
     height = 0
     selfWeight = 0
     STRENGTH = new Ability('STRENGTH')
@@ -70,7 +71,15 @@ export default class Character {
     refSave = 0
     willSave = 0
     bab = 0
+    ac = {
+        armor: 0,
+        dex: 0,
+        other: 0,
+    }
     attacks = []
+    init = 0
+    otherInit = 0
+    otherGrab = 0
     constructor() {
         allSkills.forEach(s => this.skills[s.name] = 0)
     }
@@ -86,7 +95,6 @@ export default class Character {
             rst.size = sizeMap[rst.size]
         }
         rst.class = rst.class.filter(i => i.name)
-        rst.level = rst.class.reduce((p, c) => p + c.level, 0)
         rst.class = rst.class
             .map((c) => `${c.name}*${c.level}`)
             .join(' | ')

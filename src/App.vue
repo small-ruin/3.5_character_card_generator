@@ -29,6 +29,16 @@ const template = `
 感知 {{WISDOM.ability}}（{{WISDOM.modify}}）= {{WISDOM.base}}       +{{WISDOM.race}}          +{{WISDOM.other}}
 魅力 {{CHARISMA.ability}}（{{CHARISMA.modify}}）= {{CHARISMA.base}}       +{{CHARISMA.race}}          +{{CHARISMA.other}}
 ****************************************************************************
+HP {{hitPoint}}
+防御等级 {{totalAc}}，接触 {{touchAc}}，措手不及 {{flatFootAc}}
+
+先攻调整      {{init}}
+基本攻击加值  {{bab}}
+擒抱          {{grab}}
+
+
+平常速度20尺 奔跑速度600尺
+****************************************************************************
 `
 let t = ref(new T(template))
 
