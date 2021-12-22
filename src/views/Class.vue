@@ -5,24 +5,26 @@ import { useModelWrapper } from '../hooks/useModelWrapper'
 
 const props = defineProps({
     modelValue: Object,
+    customClass: Array,
 })
 const emit = defineEmits(['update:modelValue'])
 
+const customClass = props.customClass
+
 const addClassDialogVisible = ref(false)
 const currentAddingClass = ref({})
-const customClass = ref([])
 const classOptions = computed(
     () => Object.values(classes)
         .map(cl => ({label: cl.name, value: cl.name}))
-        .concat(customClass.value.map(i => ({label: i.name, value: i.name})))
+        .concat(customClass ? customClass.map(i => ({label: i.name, value: i.name})) : [])
 )
 
 useModelWrapper(props, emit)
 
 function addClass() {
-    currentAddingClass.skills = currentAddingClass.skills.map(i => allSkillsMap[i.name])
+    currentAddingClass.skills = currentAddingClass.value.skills.map(i => allSkillsMap[i.name])
     const newClass = new Class(currentAddingClass.value.name, currentAddingClass.value)
-    customClass.value.push(newClass)
+    customClass.push(newClass)
     currentAddingClass.value = { level: 1 }
     addClassDialogVisible.value = false
 }

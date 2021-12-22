@@ -31,6 +31,8 @@ export default class Class {
         this.skills = skills
         this.skillPointsEachLevel = skillPointsEachLevel
     }
+
+    toString() { return this.name }
 }
 
 const Appraise = new Skill('估价', Abilities.INT, true)

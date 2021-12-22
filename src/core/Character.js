@@ -1,7 +1,13 @@
+import { alignMap, sizeMap } from '.'
 import { allSkills } from './Class'
 
 export default class Character {
     race = null
+    align = null
+    size = 'medium'
+    level = 0
+    height = 0
+    selfWeight = 0
     STRENGTH = 10
     DEXTERITY = 10
     CONSTITUTION = 10
@@ -37,5 +43,20 @@ export default class Character {
     }
     set(key, value) {
         this[key] = value
+    }
+    print() {
+        const rst = Object.assign({}, this)
+        if (rst.align) {
+            rst.align = alignMap[rst.align]
+        }
+        if (rst.size) {
+            rst.size = sizeMap[rst.size]
+        }
+        rst.class = rst.class.filter(i => i.name)
+        rst.level = rst.class.reduce((p, c) => p + c.level, 0)
+        rst.class = rst.class
+            .map((c) => `${c.name}*${c.level}`)
+            .join(' | ')
+        return rst
     }
 }

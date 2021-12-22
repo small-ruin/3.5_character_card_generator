@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed, watch, watchEffect } from "vue";
 import { message } from 'ant-design-vue';
-import { getWeightByStr } from '../core/Weight'
-import CharacterClass, { getClassByName, SaveType, allSkills } from '../core/Class'
+import { getWeightByStr, aligns, sizes, SaveType, allSkills  } from '../core'
+import CharacterClass, { getClassByName } from '../core/Class'
 import Class from './Class.vue'
 
 import { useModelWrapper } from '../hooks/useModelWrapper'
@@ -11,18 +11,6 @@ const props = defineProps({
     modelValue: Object,
 })
 const emit = defineEmits(['update:modelValue'])
-
-const aligns = [
-  { value: "LG", label: "守序善良" },
-  { value: "NG", label: "中立善良" },
-  { value: "CG", label: "混乱善良" },
-  { value: "LN", label: "守序中立" },
-  { value: "NN", label: "绝对中立" },
-  { value: "CN", label: "混乱中立" },
-  { value: "LE", label: "守序邪恶" },
-  { value: "NE", label: "中立邪恶" },
-  { value: "CE", label: "混乱邪恶" },
-];
 
 const form = useModelWrapper(props, emit)
 const characterClasses = computed(() => form.value.class)
@@ -40,13 +28,19 @@ const abilityModifiers = computed(() => {
 })
 
 const activeKey = ref(['base', 'class', 'abilities', 'skills', 'fates', 'items', 'spells'])
+const customClass = ref([])
 
 function safeGetClass(c) {
     if (!c.name) return null
     const level = c.level
     if (!(c instanceof CharacterClass)) {
-        c = getClassByName(c.name)
-        c.level = level
+        let cc = customClass.value.find(cc => cc.name === c.name)
+        if (cc) {
+          c = cc
+        } else {
+          c = getClassByName(c.name)
+          c.level = level
+        }
     }
     return c
 }
@@ -181,19 +175,27 @@ watchEffect(() => {
         <a-form :model="form">
           <a-form-item label="姓名"><a-input v-model:value="form.name"/></a-form-item>
           <a-form-item label="种族"><a-input v-model:value="form.race"/></a-form-item>
+          <a-form-item label="体型">
+            <a-select v-model:value="form.size">
+              <a-select-option v-for="a in sizes" :key="a.value" :value="a.value">{{a.label}}</a-select-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="性别"><a-input v-model:value="form.sex"/></a-form-item>
           <a-form-item label="年龄"><a-input v-model:value="form.age"/></a-form-item>
-          <a-form-item label="信仰"><a-input v-model:value="form.religion"/></a-form-item>
+          <a-form-item label="身高"><a-input-number v-model:value="form.height"/>尺</a-form-item>
+          <a-form-item label="体重"><a-input-number v-model:value="form.selfWeight"/>磅</a-form-item>
           <a-form-item label="阵营">
             <a-select v-model:value="form.align">
               <a-select-option v-for="a in aligns" :key="a.value" :value="a.value">{{a.label}}</a-select-option>
             </a-select>
           </a-form-item>
+          <a-form-item label="信仰"><a-input v-model:value="form.religion"/></a-form-item>
           <a-form-item label="语言"><a-input v-model:value="form.language"/></a-form-item>
           <a-form-item label="经验"><a-input v-model:value="form.exp"/>/{{levelUpExp}}</a-form-item>
         </a-form>
       </a-collapse-panel>
       <a-collapse-panel key="class" header="职业">
-        <class v-model="characterClasses"></class>
+        <class v-model="characterClasses" :custom-class="customClass"></class>
       </a-collapse-panel>
       <a-collapse-panel key="abilities" header="属性">
         <a-form :model="form">

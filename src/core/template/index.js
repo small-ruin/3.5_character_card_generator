@@ -19,7 +19,6 @@ export default class Template {
         code.startBlock()
         const varsCode = code.addSection()
         code.addLine('var result = []')
-
         const tokens = this.text.split(/({{.*?}}|{%.*?%}|{#.*?#})/g)
         for (let token of tokens) {
             if (/^\{#/.exec(token))

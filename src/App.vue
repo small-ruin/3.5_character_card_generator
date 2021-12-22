@@ -9,30 +9,30 @@ const template = `
 ****************************************************************************
 姓名：{{name}}
 种族：{{race}}
-阵营：中立善良
-体型：中等
+阵营：{{align}}
+体型：{{size}}
 年龄：{{age}}
-性别：男
+性别：{{sex}}
 语言：{{language}}
-身高：7.5尺
-体重：300磅
-信仰：卡瓦基
-职业：野蛮人一级、战士二级
-等级：三级（+1la）
-经验：{{exp}}
+身高：{{height}}尺
+体重：{{selfWeight}}磅
+信仰：{{religion}}
+职业：{{class}}
+等级：{{level}}
+经验：{{exp}}/{{levelUpExp}}
 ****************************************************************************
 `
 let t = ref(new T(template))
 
-const card = computed(() => t.value && t.value.render(pc.value))
+const card = computed(() => t.value && t.value.render(pc.value.print()))
 </script>
 
 <template>
   <div class="wrapper">
     <card v-model="pc"></card>
-    <div>
+    <pre>
       {{ card }}
-    </div>
+    </pre>
   </div>
 </template>
 
