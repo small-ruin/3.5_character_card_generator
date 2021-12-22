@@ -1,5 +1,5 @@
 import { Skill } from './Skill'
-import { Abilities } from "./Abilities"
+import { AbilityNames as Abilities } from "."
 
 export const SaveType = {
     STRONG: 'STRONG',

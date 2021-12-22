@@ -1,6 +1,39 @@
-import { alignMap, sizeMap } from '.'
+import { AbilityNames, alignMap, sizeMap } from '.'
 import { allSkills } from './Class'
 
+class Ability {
+    constructor(name) {
+        this.name = name
+    }
+    base = 10
+    race = 0
+    other = 0
+
+    get ability() {
+        return this.base + this.race + this.other
+    }
+
+    get modify() {
+        return Math.floor((this.ability - 10) / 2)
+    }
+
+    print() {
+        return {
+            name: this.name,
+            base: this.base,
+            race: this.race,
+            other: this.other,
+            ability: this.ability,
+            modify: this.modify
+        }
+    }
+
+    inject({ base, race, other }) {
+        this.base = base
+        this.race = race
+        this.other = other
+    }
+}
 export default class Character {
     race = null
     align = null
@@ -8,12 +41,12 @@ export default class Character {
     level = 0
     height = 0
     selfWeight = 0
-    STRENGTH = 10
-    DEXTERITY = 10
-    CONSTITUTION = 10
-    INTELLIGENCE = 10
-    WISDOM = 10
-    CHARISMA = 10
+    STRENGTH = new Ability('STRENGTH')
+    DEXTERITY = new Ability('DEXTERITY')
+    CONSTITUTION = new Ability('CONSTITUTION')
+    INTELLIGENCE = new Ability('INTELLIGENCE')
+    WISDOM = new Ability('WISDOM')
+    CHARISMA = new Ability('CHARISMA')
     skillPoints = 0
     raceSkillPoint = 0
     usedSkillPoints = 0
@@ -57,6 +90,12 @@ export default class Character {
         rst.class = rst.class
             .map((c) => `${c.name}*${c.level}`)
             .join(' | ')
+        
+        Object.values(AbilityNames).forEach(n => {
+            rst[n] = rst[n].print()
+        })
+
+        console.log(rst)
         return rst
     }
 }

@@ -21,6 +21,14 @@ const template = `
 等级：{{level}}
 经验：{{exp}}/{{levelUpExp}}
 ****************************************************************************
+    最终值 初始值    种族调整值    其它调整值
+力量 {{STRENGTH.ability}}（{{STRENGTH.modify}}）= {{STRENGTH.base}}       +{{STRENGTH.race}}          +{{STRENGTH.other}}
+敏捷 {{DEXTERITY.ability}}（{{DEXTERITY.modify}}）= {{DEXTERITY.base}}       +{{DEXTERITY.race}}          +{{DEXTERITY.other}}
+体质 {{CONSTITUTION.ability}}（{{CONSTITUTION.modify}}）= {{CONSTITUTION.base}}       +{{CONSTITUTION.race}}          +{{CONSTITUTION.other}}
+智力 {{INTELLIGENCE.ability}}（{{INTELLIGENCE.modify}}）= {{INTELLIGENCE.base}}       +{{INTELLIGENCE.race}}          +{{INTELLIGENCE.other}}
+感知 {{WISDOM.ability}}（{{WISDOM.modify}}）= {{WISDOM.base}}       +{{WISDOM.race}}          +{{WISDOM.other}}
+魅力 {{CHARISMA.ability}}（{{CHARISMA.modify}}）= {{CHARISMA.base}}       +{{CHARISMA.race}}          +{{CHARISMA.other}}
+****************************************************************************
 `
 let t = ref(new T(template))
 
@@ -29,7 +37,9 @@ const card = computed(() => t.value && t.value.render(pc.value.print()))
 
 <template>
   <div class="wrapper">
-    <card v-model="pc"></card>
+    <div>
+      <card v-model="pc"></card>
+    </div>
     <pre>
       {{ card }}
     </pre>
@@ -38,6 +48,7 @@ const card = computed(() => t.value && t.value.render(pc.value.print()))
 
 <style>
 #app {
+  height: 100%;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -45,5 +56,10 @@ const card = computed(() => t.value && t.value.render(pc.value.print()))
 }
 .wrapper {
   display: flex;
+  height: 100%;
+}
+.wrapper > div {
+  height: 100%;
+  overflow: auto;
 }
 </style>

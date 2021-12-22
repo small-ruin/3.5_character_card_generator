@@ -28,3 +28,12 @@ export const sizes = [
     { value: 'colossal', label: '超巨型'},
 ]
 export const sizeMap = gMap(sizes)
+
+export const AbilityNames = {
+    STR: 'STRENGTH',
+    DEX: 'DEXTERITY',
+    CON: 'CONSTITUTION',
+    INT: 'INTELLIGENCE',
+    WIS: 'WISDOM',
+    CHA: 'CHARISMA'
+}

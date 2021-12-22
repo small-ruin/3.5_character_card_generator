@@ -15,15 +15,14 @@ const emit = defineEmits(['update:modelValue'])
 const form = useModelWrapper(props, emit)
 const characterClasses = computed(() => form.value.class)
 
-const computeAbilityModify = ability => Math.floor((ability - 10) / 2)
 const abilityModifiers = computed(() => {
   return {
-      STRENGTH: computeAbilityModify(form.value['STRENGTH']),
-      DEXTERITY: computeAbilityModify(form.value['DEXTERITY']),
-      CONSTITUTION: computeAbilityModify(form.value['CONSTITUTION']),
-      INTELLIGENCE: computeAbilityModify(form.value['INTELLIGENCE']),
-      WISDOM: computeAbilityModify(form.value['WISDOM']),
-      CHARISMA: computeAbilityModify(form.value['CHARISMA']),
+      STRENGTH: form.value['STRENGTH'].modify,
+      DEXTERITY: form.value['DEXTERITY'].modify,
+      CONSTITUTION: form.value['CONSTITUTION'].modify,
+      INTELLIGENCE: form.value['INTELLIGENCE'].modify,
+      WISDOM: form.value['WISDOM'].modify,
+      CHARISMA: form.value['CHARISMA'].modify,
   }
 })
 
@@ -145,7 +144,7 @@ autoIncrease(form.value.fates, 'name')
 autoIncrease(form.value.items, 'name')
 autoIncrease(form.value.spells, 'name')
 
-const weightLimit = computed(() => getWeightByStr(form.value.STRENGTH))
+const weightLimit = computed(() => getWeightByStr(form.value.STRENGTH.ability))
 const coinWeight = computed(() => ((form.value.pp + form.value.gp + form.value.sp + form.value.cp) / 50).toFixed(2))
 const weight = computed(() => (
   form.value.items.reduce((p, c) => p +
@@ -199,12 +198,42 @@ watchEffect(() => {
       </a-collapse-panel>
       <a-collapse-panel key="abilities" header="属性">
         <a-form :model="form">
-          <a-form-item label="力量"><a-input-number v-model:value="form.STRENGTH"/></a-form-item>
-          <a-form-item label="敏捷"><a-input-number v-model:value="form.DEXTERITY"/></a-form-item>
-          <a-form-item label="体质"><a-input-number v-model:value="form.CONSTITUTION"/></a-form-item>
-          <a-form-item label="智力"><a-input-number v-model:value="form.INTELLIGENCE"/></a-form-item>
-          <a-form-item label="感知"><a-input-number v-model:value="form.WISDOM"/></a-form-item>
-          <a-form-item label="魅力"><a-input-number v-model:value="form.CHARISMA"/></a-form-item>
+          <a-form-item label="力量">
+            {{form.STRENGTH.ability}}=
+            <a-input-number v-model:value="form.STRENGTH.base"/>初始值
+            + <a-input-number v-model:value="form.STRENGTH.race" />种族调整
+            + <a-input-number v-model:value="form.STRENGTH.other"/>其它调整
+          </a-form-item>
+          <a-form-item label="敏捷">
+            {{form.DEXTERITY.ability}}=
+            <a-input-number v-model:value="form.DEXTERITY.base"/>初始值
+            + <a-input-number v-model:value="form.DEXTERITY.race" />种族调整
+            + <a-input-number v-model:value="form.DEXTERITY.other"/>其它调整
+          </a-form-item>
+          <a-form-item label="体质">
+            {{form.CONSTITUTION.ability}}=
+            <a-input-number v-model:value="form.CONSTITUTION.base"/>初始值
+            + <a-input-number v-model:value="form.CONSTITUTION.race" />种族调整
+            + <a-input-number v-model:value="form.CONSTITUTION.other"/>其它调整
+          </a-form-item>
+          <a-form-item label="智力">
+            {{form.INTELLIGENCE.ability}}=
+            <a-input-number v-model:value="form.INTELLIGENCE.base"/>初始值
+            + <a-input-number v-model:value="form.INTELLIGENCE.race" />种族调整
+            + <a-input-number v-model:value="form.INTELLIGENCE.other"/>其它调整
+          </a-form-item>
+          <a-form-item label="感知">
+            {{form.WISDOM.ability}}=
+            <a-input-number v-model:value="form.WISDOM.base"/>初始值
+            + <a-input-number v-model:value="form.WISDOM.race" />种族调整
+            + <a-input-number v-model:value="form.WISDOM.other"/>其它调整
+          </a-form-item>
+          <a-form-item label="魅力">
+            {{form.CHARISMA.ability}}=
+            <a-input-number v-model:value="form.CHARISMA.base"/>初始值
+            + <a-input-number v-model:value="form.CHARISMA.race" />种族调整
+            + <a-input-number v-model:value="form.CHARISMA.other"/>其它调整
+          </a-form-item>
         
           <a-form-item label="bab">{{bab}}</a-form-item>
           <a-form-item label="擒抱"></a-form-item>
