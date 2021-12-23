@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, watchEffect } from "vue";
 import { message } from 'ant-design-vue';
-import { getWeightByStr, aligns, sizes, sizeModifyMap, SaveType, allSkills  } from '../core'
+import { getWeightByStr, aligns, sizes, sizeModifyMap, SaveType, allSkills, AbilityNameMap  } from '../core'
 import CharacterClass, { getClassByName } from '../core/Class'
 import Class from './Class.vue'
 
@@ -25,7 +25,7 @@ const abilityModifiers = computed(() => {
   }
 })
 
-const activeKey = ref(['base', 'class', 'abilities', 'skills', 'fates', 'items', 'spells'])
+const activeKey = ref(['base', 'class', 'abilities', 'skills', 'fates', 'traits', 'items', 'spells'])
 const customClass = ref([])
 
 function safeGetClass(c) {
@@ -69,6 +69,9 @@ const bab = computed(() => characterClasses.value.reduce((p, c) => {
 const fortSave = createSaveComputed('fortSave')
 const refSave = createSaveComputed('refSave')
 const willSave = createSaveComputed('willSave')
+const totalFortSave = computed(() => fortSave.value + form.value.otherFortSave + form.value.CONSTITUTION.modify)
+const totalRefSave = computed(() => refSave.value + form.value.otherRefSave + form.value.DEXTERITY.modify)
+const totalWillSave = computed(() => willSave.value + form.value.otherWillSave + form.value.WISDOM.modify)
 
 const skillMax = computed(() => characterClasses.value.reduce((p, c) => p + c.level || 0, 3))
 
@@ -107,7 +110,7 @@ const skillPoints = computed(() => {
 })
 
 const usedSkillPoints = computed(() => {
-  return Object.values(form.value.skills).reduce((p, c) => p + c, 0)
+  return Object.values(form.value.skills).reduce((p, c) => p + c.point, 0)
 })
 
 const levelUpExp = computed(() => {
@@ -118,7 +121,7 @@ const levelUpExp = computed(() => {
 function handleSkillInputChange(p, skill) {
   if (skillPoints.value - usedSkillPoints.value < 0) {
     message.error('没有技能点了')
-    form.value.skills[skill.name] = p - 1
+    form.value.skills[skill.name].point = p - 1
   }
 }
 
@@ -136,6 +139,7 @@ const autoIncrease = (target, key) => {
   )
 }
 autoIncrease(form.value.fates, 'name')
+autoIncrease(form.value.traits, 'name')
 autoIncrease(form.value.items, 'name')
 autoIncrease(form.value.spells, 'name')
 
@@ -143,13 +147,14 @@ const weightLimit = computed(() => getWeightByStr(form.value.STRENGTH.ability))
 const coinWeight = computed(() => ((form.value.pp + form.value.gp + form.value.sp + form.value.cp) / 50).toFixed(2))
 const weight = computed(() => (
   form.value.items.reduce((p, c) => p +
-    +(c.weight || 0), 0) +
+    +(c.weight * c.count || 0), 0) +
     +coinWeight.value).toFixed(2)
 )
 const weightDetail = computed(() => {
   if (weight.value < weightLimit.value[0]) return '轻载'
-  if (weightLimit.value[0] < weight.value < weightLimit.value[1]) return '中载'
-  if (weight.value > weightLimit.value[2]) return '轻载'
+  else if (weight.value <= weightLimit.value[1]) return '中载'
+  else if (weight.value <= weightLimit.value[2]) return '重载'
+  else return '超重'
 })
 const hitPoint = computed(() => {
   return (form.value.classHitPoint || 0) + form.value.CONSTITUTION.modify * level.value
@@ -166,7 +171,9 @@ watchEffect(() => {
     skillMax, skillPoints, usedSkillPoints,
     levelUpExp, weightLimit, coinWeight,
     weight, weightDetail, level, hitPoint,
-    totalAc, touchAc, flatFootAc, init, grab
+    totalAc, touchAc, flatFootAc, init, grab,
+    totalFortSave, totalRefSave, totalWillSave,
+    classSkills, abilityModifiers, weightLimit
   }
   Object.keys(map).forEach(k => form.value.set(k, map[k].value))
 })
@@ -266,10 +273,17 @@ watchEffect(() => {
             {{grab}}={{bab}}bab+{{form.STRENGTH.modify}}力量+{{sizeModifyMap[form.size] * 4}}体型+
           <a-input-number v-model:value="form.otherGrab"></a-input-number>其它
           </a-form-item>
-          <a-form-item label="强韧检定">{{fortSave}}</a-form-item>
-          <a-form-item label="反射检定">{{refSave}}</a-form-item>
-          <a-form-item label="意志检定">{{willSave}}</a-form-item>
-
+          <a-form-item label="强韧豁免">
+            {{totalFortSave}}={{fortSave}}基础 + <a-input-number v-model:value="form.otherFortSave"></a-input-number>其它
+          </a-form-item>
+          <a-form-item label="反射豁免">
+            {{totalRefSave}}={{refSave}}基础 + <a-input-number v-model:value="form.otherRefSave"></a-input-number>其它</a-form-item>
+          <a-form-item label="意志豁免">
+            {{totalWillSave}}={{willSave}}基础 + <a-input-number v-model:value="form.otherWillSave"></a-input-number>其它</a-form-item>
+          <a-form-item label="速度">
+            <a-input-number v-model:value="form.speed"></a-input-number>
+            奔跑<a-input-number v-model:value="form.runSpeed"></a-input-number>
+          </a-form-item>
         </a-form>
       </a-collapse-panel>
       <a-collapse-panel key="skills" header="技能">
@@ -279,31 +293,48 @@ watchEffect(() => {
               :min="0"
               ></a-input-number>
         </a-form-item>
+        <a-form-item label="盔甲减值">
+            <a-input-number
+              v-model:value="form.armorSkillModify"
+              :min="0"
+            ></a-input-number>
+        </a-form-item>
         <a-form-item>剩余技能点数：{{skillPoints - usedSkillPoints}}</a-form-item>
         <a-form-item v-for="s in allSkills" :key="s.name" :label="s.name">
             <span v-if="s.name in classSkills">本职技能</span>
+            <span>{{s.getPoint(
+              abilityModifiers,
+              form.skills[s.name],
+              classSkills[s.name],
+              form.armorSkillModify
+            )}}</span> =
             <a-input-number
-              v-model:value="form.skills[s.name]"
+              v-model:value="form.skills[s.name].point"
               @change="v => handleSkillInputChange(v, s)"
               :max="skillMax"
               :min="0"
               ></a-input-number>
-            <span>{{s.getPoint(
-              abilityModifiers,
-              form.skills[s.name] || 0,
-              classSkills[s.name]
-            )}}</span>
+            + {{abilityModifiers[s.baseAbility]}}{{AbilityNameMap[s.baseAbility]}}
+            + <a-input-number v-model:value="form.skills[s.name].other"></a-input-number>其它
+
         </a-form-item>
       </a-collapse-panel>
-      <a-collapse-panel key="fate" header="专长">
+      <a-collapse-panel key="fates" header="专长">
         <a-form-item v-for="(f, i) in form.fates" :key="i">
           <a-input placeholder="专长名" v-model:value="f.name" />
           <a-textarea placeholder="专长描述(非必填)" v-model:value="f.describe"></a-textarea>
         </a-form-item>
       </a-collapse-panel>
+      <a-collapse-panel key="traits" header="种族特性与职业能力">
+        <a-form-item v-for="(t, i) in form.traits" :key="i">
+          <a-input placeholder="特性" v-model:value="t.name" />
+          <a-textarea placeholder="描述(非必填)" v-model:value="t.describe"></a-textarea>
+        </a-form-item>
+      </a-collapse-panel>
       <a-collapse-panel key="items" header="物品">
         <a-form-item v-for="(it, i) in form.items" :key="i">
           <a-input placeholder="物品名称" v-model:value="it.name" />
+          <a-input-number v-model:value="it.count" />数量
           <a-input placeholder="价格" v-model:value="it.price"></a-input>
           <a-input placeholder="重量" v-model:value="it.weight"></a-input>
           <a-textarea placeholder="备注" v-model:value="it.remark"></a-textarea>
@@ -318,7 +349,7 @@ watchEffect(() => {
         </a-form-item>
         <a-form-item>
           <p>负重：{{weight}}磅, {{weightDetail}}</p>
-          轻载：{{'<' + weightLimit[0]}} 中载：{{'<' + (weightLimit[1] + 1)}} 重载：{{'>' + weightLimit[2]}}
+          轻载：{{'<' + weightLimit[0]}} 中载：{{'<' + (weightLimit[1] + 1)}} 重载：{{'<' + (weightLimit[2] + 1)}}
         </a-form-item>
 
       </a-collapse-panel>

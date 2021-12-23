@@ -1,5 +1,5 @@
 import { Skill } from './Skill'
-import { AbilityNames as Abilities } from "."
+import { Abilities } from "."
 
 export const SaveType = {
     STRONG: 'STRONG',
@@ -142,6 +142,7 @@ export const allSkills = [
     UseRope ,
 ]
 
+export const canUseUntrainedSkills = allSkills.filter(s => s.canUseUntrained).map(i => i.name)
 const allSkillMap = {}
 allSkills.forEach(s => allSkillMap[s.name] = s)
 export const allSkillsMap = allSkillMap;

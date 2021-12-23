@@ -6,8 +6,8 @@ import T from './core/template/index.js'
 
 const pc = ref(new PC())
 const template = `
+{{name}}
 ****************************************************************************
-姓名：{{name}}
 种族：{{race}}
 阵营：{{align}}
 体型：{{size}}
@@ -36,9 +36,59 @@ HP {{hitPoint}}
 基本攻击加值  {{bab}}
 擒抱          {{grab}}
 
-
-平常速度20尺 奔跑速度600尺
+平常速度{{speed}}尺 奔跑速度{{runSpeed}}尺
 ****************************************************************************
+强韧豁免    {{totalFortSave}} （{{CONSTITUTION.modify}}体质修正+{{fortSave}}职业+{{otherFortSave}}其它）
+
+反射豁免    {{totalRefSave}} （{{DEXTERITY.modify}}敏捷修正+{{refSave}}职业+{{otherRefSave}}其它）
+
+意志豁免    {{totalWillSave}} （{{WISDOM.modify}}感知修正+{{willSave}}职业+{{otherWIllSave}}其它）
+****************************************************************************
+攻击：
+
+歌利亚大型巨锤 攻击：d20+6+3+1 伤害：3d6+9 重击：X4
+
+歌利亚大型巨锤猛力 攻击：d20+6+1 伤害：3d6+9+6 重击：X4
+
+戟 攻击：d20+6+3+1 伤害：2d6+9 重击：X3
+
+戟猛力 攻击：d20+6+1 伤害：2d6+9+6 重击：X3
+****************************************************************************
+专长：
+{% for fate in fates %}{{fate.name}}
+{{fate.describe}}
+
+{% endfor %}
+***************************************************************************
+种族特性与职业能力：
+{% for t in traits %}{{t.name}}
+{{t.describe}}
+
+{% endfor %}
+***************************************************************************
+技能点：{{skillPoints}}
+技能  分配点数  最终值{% for s in skills %}
+{{s.isClassSkill}}{{s.name}}{{s.canUseUntrained}}  （{{s.point}}）      {{s.total}}{% endfor %}
+
+* 非受训技能
+√ 本职技能
+***************************************************************************
+随身物品：
+{% for i in items %}
+{{i.name}}*{{i.count}} {{i.price}}gp {{i.weight}}磅
+{% endfor %}
+
+货币：
+{{pp}}pp {{gp}}gp {{sp}}sp {{cp}}cp, 货币总重：{{coinWeight}}磅
+
+负重：{{weight}}磅, {{weightDetail}} 
+轻载：< {{weightLimit.0}} 中载 < {{weightLimit.1}} 重载 < {{weightLimit.2}}
+
+特殊物品：
+{% for mi in magicItems %}{{mi.name}}
+{{mi.remark}}
+
+{% endfor %}
 `
 let t = ref(new T(template))
 

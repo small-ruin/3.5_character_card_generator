@@ -13,14 +13,15 @@ export class Skill {
         this.armor = armor
     }
 
-    getPoint(abilities, point, isClassSkill, armor=0) {
+    getPoint(abilities, {point = 0, other = 0}, isClassSkill, armor=0) {
         if (!this.canUseUntrained && point === 0) {
             return '-'
         }
         if (!isClassSkill) {
             point = Math.floor(point / 2)
         }
-        point += abilities[this.baseAbility]
+        point += abilities[this.baseAbility] || 0
+        point += other
         if (armor) {
             point -= armor * this.armor
         }

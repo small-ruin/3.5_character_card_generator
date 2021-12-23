@@ -1,4 +1,4 @@
-import { AbilityNames, alignMap, sizeMap } from '.'
+import { Abilities, alignMap, sizeMap, canUseUntrainedSkills, allSkillsMap } from '.'
 import { allSkills } from './Class'
 
 class Ability {
@@ -42,21 +42,22 @@ export default class Character {
     classHitPoint = 0
     height = 0
     selfWeight = 0
-    STRENGTH = new Ability('STRENGTH')
-    DEXTERITY = new Ability('DEXTERITY')
-    CONSTITUTION = new Ability('CONSTITUTION')
-    INTELLIGENCE = new Ability('INTELLIGENCE')
-    WISDOM = new Ability('WISDOM')
-    CHARISMA = new Ability('CHARISMA')
+    STRENGTH = new Ability(Abilities.STR)
+    DEXTERITY = new Ability(Abilities.DEX)
+    CONSTITUTION = new Ability(Abilities.CON)
+    INTELLIGENCE = new Ability(Abilities.INT)
+    WISDOM = new Ability(Abilities.WIS)
+    CHARISMA = new Ability(Abilities.CHA)
     skillPoints = 0
     raceSkillPoint = 0
     usedSkillPoints = 0
     levelUpExp = 0
-    weightLimit = 0
+    weightLimit = []
     coinWeight = 0
     weight = 0
     weightDetail = '轻载'
     skills = {}
+    armorSkillModify = 0
     class = [{ level: 1 }]
     fates = [{}]
     items = [{}]
@@ -68,8 +69,11 @@ export default class Character {
     exp = 0
     hitPoint = 0
     fortSave = 0
+    otherFortSave = 0
     refSave = 0
+    otherRefSave = 0
     willSave = 0
+    otherWillSave = 0
     bab = 0
     ac = {
         armor: 0,
@@ -77,29 +81,61 @@ export default class Character {
         other: 0,
     }
     attacks = []
+    traits = [{}]
     init = 0
     otherInit = 0
+    grab = 0
     otherGrab = 0
+    speed = 30
+    runSpeed = 120
     constructor() {
-        allSkills.forEach(s => this.skills[s.name] = 0)
+        allSkills.forEach(s => this.skills[s.name] = {
+            point: 0,
+            other: 0
+        })
     }
     set(key, value) {
         this[key] = value
     }
     print() {
         const rst = Object.assign({}, this)
-        if (rst.align) {
-            rst.align = alignMap[rst.align]
+        const {
+             align, size, traits, fates, skills,
+            classSkills, abilityModifiers, armorSkillModify,
+            items, weightLimit
+        } = rst
+        if (align) {
+            rst.align = alignMap[align]
         }
-        if (rst.size) {
-            rst.size = sizeMap[rst.size]
+        if (size) {
+            rst.size = sizeMap[size]
         }
+        rst.fates = fates.filter(i => i.name || i.describe)
+        rst.traits = traits.filter(i => i.name || i.describe)
         rst.class = rst.class.filter(i => i.name)
         rst.class = rst.class
             .map((c) => `${c.name}*${c.level}`)
             .join(' | ')
-        
-        Object.values(AbilityNames).forEach(n => {
+        rst.items = items.filter(i => i.name)
+        rst.magicItems = items.filter(i => i.remark)
+        rst.skills = Object.keys(skills).map(s => {
+            const i = allSkillsMap[s]
+            const isClassSkill = s in (classSkills || {})
+
+            return {
+                name: s,
+                ...skills[s],
+                isClassSkill: isClassSkill ? '√' : '',
+                canUseUntrained: i.canUseUntrained ? '' : '*',
+                modify: this[
+                    allSkillsMap[s].baseAbility
+                ]?.modify,
+                total: i.getPoint(abilityModifiers || {}, skills[s], isClassSkill, armorSkillModify)
+            }
+        })
+        rst.weightLimit = [weightLimit[0], weightLimit[1]+1, weightLimit[2]+1]
+
+        Object.values(Abilities).forEach(n => {
             rst[n] = rst[n].print()
         })
 

@@ -40,11 +40,20 @@ export const sizeModifyMap = {
     colossal: 4,
 }
 
-export const AbilityNames = {
+export const Abilities = {
     STR: 'STRENGTH',
     DEX: 'DEXTERITY',
     CON: 'CONSTITUTION',
     INT: 'INTELLIGENCE',
     WIS: 'WISDOM',
     CHA: 'CHARISMA'
+}
+
+export const AbilityNameMap = {
+    [Abilities.STR]: '力量',
+    [Abilities.DEX]: '敏捷',
+    [Abilities.CON]: '体质',
+    [Abilities.INT]: '智力',
+    [Abilities.WIS]: '感知',
+    [Abilities.CHA]: '魅力'
 }
