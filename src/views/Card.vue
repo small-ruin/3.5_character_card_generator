@@ -25,7 +25,7 @@ const abilityModifiers = computed(() => {
   }
 })
 
-const activeKey = ref(['base', 'class', 'abilities', 'skills', 'fates', 'traits', 'items', 'spells'])
+const activeKey = ref(['base', 'class', 'abilities', 'skills', 'fates', 'traits', 'items', 'spells', 'attacks', 'armors'])
 const customClass = ref([])
 
 function safeGetClass(c) {
@@ -141,7 +141,9 @@ const autoIncrease = (target, key) => {
 autoIncrease(form.value.fates, 'name')
 autoIncrease(form.value.traits, 'name')
 autoIncrease(form.value.items, 'name')
-autoIncrease(form.value.spells, 'name')
+autoIncrease(form.value.spells, 'spell')
+autoIncrease(form.value.attacks, 'name')
+autoIncrease(form.value.armors, 'name')
 
 const weightLimit = computed(() => getWeightByStr(form.value.STRENGTH.ability))
 const coinWeight = computed(() => ((form.value.pp + form.value.gp + form.value.sp + form.value.cp) / 50).toFixed(2))
@@ -286,6 +288,25 @@ watchEffect(() => {
           </a-form-item>
         </a-form>
       </a-collapse-panel>
+      <a-collapse-panel key="attacks" header="攻击">
+        <a-form-item v-for="(a, i) in form.attacks" :key="i">
+          <a-input placeholder="武器" v-model:value="a.name" />
+          <a-input placeholder="攻击检定" v-model:value="a.attackRoll" />
+          <a-input placeholder="伤害骰" v-model:value="a.damage" />
+          <a-input placeholder="重击" v-model:value="a.critical" />
+          <a-input-number placeholder="射程" v-model:value="a.range" />
+        </a-form-item>
+      </a-collapse-panel>
+      <a-collapse-panel key="armors" header="盔甲">
+          <a-form-item v-for="(a, i) in form.armors" :key="i">
+            <a-input placeholder="名称" v-model:value="a.name" />
+            <a-input-number v-model:value="a.bonus" />盔甲和盾牌加值
+            <a-input-number v-model:value="a.maxDex" />最大敏捷加值
+            <a-input-number v-model:value="a.checkPenalty" />防具检定减值
+            <a-input-number v-model:value="a.arcaneFailure" />% 奥术失败几率
+            <a-input-number v-model:value="a.speed" />速度
+          </a-form-item>
+      </a-collapse-panel>
       <a-collapse-panel key="skills" header="技能">
         <a-form-item label="种族奖励技能点">
             <a-input-number
@@ -355,7 +376,7 @@ watchEffect(() => {
       </a-collapse-panel>
       <a-collapse-panel key="spells" header="法术">
         <a-form-item v-for="(f, i) in form.spells" :key="i">
-          {{i}}环：<a-textarea v-model:value="f.name"></a-textarea>
+          {{i}}环：<a-textarea v-model:value="f.spell"></a-textarea>
         </a-form-item>
       </a-collapse-panel>
     </a-collapse>

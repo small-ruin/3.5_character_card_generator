@@ -80,7 +80,8 @@ export default class Character {
         dex: 0,
         other: 0,
     }
-    attacks = []
+    attacks = [{}]
+    armors = [{}]
     traits = [{}]
     init = 0
     otherInit = 0
@@ -102,7 +103,7 @@ export default class Character {
         const {
              align, size, traits, fates, skills,
             classSkills, abilityModifiers, armorSkillModify,
-            items, weightLimit
+            items, weightLimit, attacks, armors, spells,
         } = rst
         if (align) {
             rst.align = alignMap[align]
@@ -112,6 +113,8 @@ export default class Character {
         }
         rst.fates = fates.filter(i => i.name || i.describe)
         rst.traits = traits.filter(i => i.name || i.describe)
+        rst.attacks = attacks.filter(i => i.name || i.describe)
+        rst.armors = armors.filter(i => i.name || i.describe)
         rst.class = rst.class.filter(i => i.name)
         rst.class = rst.class
             .map((c) => `${c.name}*${c.level}`)
@@ -134,6 +137,8 @@ export default class Character {
             }
         })
         rst.weightLimit = [weightLimit[0], weightLimit[1]+1, weightLimit[2]+1]
+
+        rst.spells = spells.filter(s => s.spell).map((sp, i) => ({name: i + '环', spell: sp.spell}))
 
         Object.values(Abilities).forEach(n => {
             rst[n] = rst[n].print()
