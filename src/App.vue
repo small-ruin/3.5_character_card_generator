@@ -3,6 +3,8 @@ import { ref, computed } from '@vue/reactivity'
 import Card from './views/Card.vue'
 import PC from './core/Character'
 import T from './core/template/index.js'
+import LZUTF8 from 'lzutf8';
+
 
 const pc = ref(new PC())
 const template = `
@@ -100,17 +102,76 @@ HP {{hitPoint}}
 let t = ref(new T(template))
 
 const card = computed(() => t.value && t.value.render(pc.value.print()))
+const fingerprint = computed(() => LZUTF8.compress(
+      new TextEncoder('utf-8').encode(JSON.stringify(pc.value.print()), 'utf8'),
+      {outputEncoding: 'Base64'}
+  ))
+
+function handleCreate() {
+  const blob = new Blob(
+    [
+      t.value.render(pc.value.print()),
+      '\n-------- 指纹 --------\n',
+      fingerprint.value
+    ],
+    { type: "text/plain;charset=utf-8" }
+  )
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob);
+  a.download = pc.value.name + '.txt';
+
+  let history = JSON.parse(localStorage.getItem('history'))
+  const compressed = LZUTF8.compress(
+      new TextEncoder('utf-8').encode(pc.value.print(), 'utf8'),
+      {outputEncoding: 'Base64'}
+  )
+  if (history) {
+    history.push(compressed)
+  } else {
+    history = [compressed]
+  }
+
+  localStorage.setItem('history', JSON.stringify(history))
+  a.click()
+}
+
+const importDialogVisible = ref(false)
+const importFingerprint = ref('')
+function importCard(fingerprint) {
+  const data = LZUTF8.decompress(
+      importFingerprint.value,
+      {inputEncoding: 'Base64'}
+  )
+
+  pc.value.import(JSON.parse(data))
+
+  console.log(data)
+}
 </script>
 
 <template>
+  <div>
+    <a-button @click="handleCreate">生成人物卡</a-button>
+    <a-button @click="() => importDialogVisible=true">从指纹导入人物卡</a-button>
+  </div>
   <div class="wrapper">
     <div>
       <card v-model="pc"></card>
     </div>
     <pre>
-      {{ card }}
+{{ card }}
+-------- 指纹 --------
+{{ fingerprint }}
     </pre>
   </div>
+  <div><a-button @click="handleCreate">生成人物卡</a-button></div>
+  <a-modal
+    v-model:visible="importDialogVisible"
+    title="从指纹导入"
+    @ok="importCard"
+  >
+    <a-textarea v-model:value="importFingerprint"></a-textarea>
+  </a-modal>
 </template>
 
 <style>
@@ -128,5 +189,10 @@ const card = computed(() => t.value && t.value.render(pc.value.print()))
 .wrapper > div {
   height: 100%;
   overflow: auto;
+}
+pre {
+  max-width: 50%;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 </style>

@@ -144,7 +144,24 @@ export default class Character {
             rst[n] = rst[n].print()
         })
 
-        console.log(rst)
+        // console.log(rst)
         return rst
+    }
+    import(o) {
+        o.class = o.class.split('|').map(i => {
+            const rst = {}
+            const [name, level] = i.split('*')
+            rst.name = name
+            rst.level = level
+            return rst
+        })
+        delete o.skills
+        Object.values(Abilities).forEach(n => {
+            const origin = o[n]
+            o[n] = new Ability(n)
+            o[n].inject(origin)
+        })
+        Object.assign(this, o)
+
     }
 }
