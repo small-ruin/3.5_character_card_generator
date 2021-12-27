@@ -182,26 +182,26 @@ watchEffect(() => {
 <template>
     <a-collapse v-model:activeKey="activeKey">
       <a-collapse-panel key="base" header="基础信息">
-        <a-form :model="form">
-          <a-form-item label="姓名"><a-input v-model:value="form.name"/></a-form-item>
-          <a-form-item label="种族"><a-input v-model:value="form.race"/></a-form-item>
-          <a-form-item label="体型">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="姓名" class="cg-input__base"><a-input v-model:value="form.name"/></a-form-item>
+          <a-form-item label="种族" class="cg-input__base"><a-input v-model:value="form.race"/></a-form-item>
+          <a-form-item label="体型" class="cg-input__fix">
             <a-select v-model:value="form.size">
               <a-select-option v-for="a in sizes" :key="a.value" :value="a.value">{{a.label}}</a-select-option>
             </a-select>
           </a-form-item>
-          <a-form-item label="性别"><a-input v-model:value="form.sex"/></a-form-item>
-          <a-form-item label="年龄"><a-input v-model:value="form.age"/></a-form-item>
-          <a-form-item label="身高"><a-input-number v-model:value="form.height" step="0.1" />尺</a-form-item>
-          <a-form-item label="体重"><a-input-number v-model:value="form.selfWeight" />磅</a-form-item>
-          <a-form-item label="阵营">
+          <a-form-item label="性别" class="cg-input__base"><a-input v-model:value="form.sex"/></a-form-item>
+          <a-form-item label="年龄" class="cg-input__base"><a-input v-model:value="form.age"/></a-form-item>
+          <a-form-item label="阵营" class="cg-input__fix">
             <a-select v-model:value="form.align">
               <a-select-option v-for="a in aligns" :key="a.value" :value="a.value">{{a.label}}</a-select-option>
             </a-select>
           </a-form-item>
-          <a-form-item label="信仰"><a-input v-model:value="form.religion"/></a-form-item>
-          <a-form-item label="语言"><a-input v-model:value="form.language"/></a-form-item>
-          <a-form-item label="经验"><a-input v-model:value="form.exp"/>/{{levelUpExp}}</a-form-item>
+          <a-form-item label="经验" class="cg-input__base exp"><a-input v-model:value="form.exp"/>/{{levelUpExp}}</a-form-item>
+          <a-form-item label="身高"><a-input-number v-model:value="form.height" step="0.1" />尺</a-form-item>
+          <a-form-item label="体重"><a-input-number v-model:value="form.selfWeight" />磅</a-form-item>
+          <a-form-item label="信仰" class="cg-input__base"><a-input v-model:value="form.religion"/></a-form-item>
+          <a-form-item label="语言" class="cg-input__base_long"><a-input v-model:value="form.language"/></a-form-item>
         </a-form>
       </a-collapse-panel>
       <a-collapse-panel key="class" header="职业">
@@ -289,23 +289,23 @@ watchEffect(() => {
         </a-form>
       </a-collapse-panel>
       <a-collapse-panel key="attacks" header="攻击">
-        <a-form-item v-for="(a, i) in form.attacks" :key="i">
-          <a-input placeholder="武器" v-model:value="a.name" />
-          <a-input placeholder="攻击检定" v-model:value="a.attackRoll" />
-          <a-input placeholder="伤害骰" v-model:value="a.damage" />
-          <a-input placeholder="重击" v-model:value="a.critical" />
-          <a-input-number placeholder="射程" v-model:value="a.range" />
-        </a-form-item>
+        <a-form layout="inline" v-for="(a, i) in form.attacks" :key="i">
+          <a-form-item class="cg-input__base" label="武器"><a-input placeholder="武器" v-model:value="a.name" /></a-form-item>
+          <a-form-item class="cg-input__base" label="攻击检定"><a-input placeholder="攻击检定" v-model:value="a.attackRoll" /></a-form-item>
+          <a-form-item class="cg-input__base" label="伤害骰"><a-input placeholder="伤害骰" v-model:value="a.damage" /></a-form-item>
+          <a-form-item class="cg-input__base" label="重击"><a-input placeholder="重击" v-model:value="a.critical" /></a-form-item>
+          <a-form-item label="射程"><a-input-number v-model:value="a.range" /></a-form-item>
+        </a-form>
       </a-collapse-panel>
-      <a-collapse-panel key="armors" header="盔甲">
-          <a-form-item v-for="(a, i) in form.armors" :key="i">
-            <a-input placeholder="名称" v-model:value="a.name" />
-            <a-input-number v-model:value="a.bonus" />盔甲和盾牌加值
-            <a-input-number v-model:value="a.maxDex" />最大敏捷加值
-            <a-input-number v-model:value="a.checkPenalty" />防具检定减值
-            <a-input-number v-model:value="a.arcaneFailure" />% 奥术失败几率
-            <a-input-number v-model:value="a.speed" />速度
-          </a-form-item>
+      <a-collapse-panel key="armors" header="盔甲" class="section__armor">
+          <a-form layout="inline" v-for="(a, i) in form.armors" :key="i">
+            <a-form-item label="名称"><a-input v-model:value="a.name" /></a-form-item>
+            <a-form-item label="盔甲和盾牌加值"><a-input-number v-model:value="a.bonus" /></a-form-item>
+            <a-form-item label="最大敏捷加值"><a-input-number v-model:value="a.maxDex" /></a-form-item>
+            <a-form-item label="防具检定减值"><a-input-number v-model:value="a.checkPenalty" /></a-form-item>
+            <a-form-item label="奥术失败几率"><a-input-number v-model:value="a.arcaneFailure" />%</a-form-item>
+            <a-form-item label="速度"><a-input-number v-model:value="a.speed" />尺</a-form-item>
+          </a-form>
       </a-collapse-panel>
       <a-collapse-panel key="skills" header="技能">
         <a-form-item label="种族奖励技能点">
@@ -385,3 +385,45 @@ watchEffect(() => {
       </a-collapse-panel>
     </a-collapse>
 </template>
+
+<style>
+.cg-input__base {
+  width: 30%
+}
+.cg-input__base_short {
+  width: 20%
+}
+.cg-input__base_long {
+  width: 100%
+}
+.cg-input__fix {
+  width: 200px
+}
+.ant-form-inline .ant-form-item {
+  margin: 20px 0;
+}
+#app .ant-input-number {
+  width: 50px;
+}
+#app .ant-form-item-control-input-content, #app .ant-input, #app .ant-form-item-label > label,
+#app .ant-select, #app .ant-btn {
+  font-size: 12px;
+}
+#app .ant-form-item-label > label {
+  min-width: 50px;
+  justify-content: right;
+}
+.exp .ant-form-item-control-input-content {
+  display: flex;
+  align-items: center;
+}
+.button-group .ant-btn{
+  margin-right: 10px;
+}
+#app .section__armor .ant-form-item-label label {
+  min-width: 40px;
+}
+#app .section__armor .ant-form-inline .ant-form-item {
+  margin-right: 8px;
+}
+</style>

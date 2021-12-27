@@ -39,17 +39,24 @@ function addClass() {
 </script>
 
 <template>
-    <a-button @click="() => createClassDialogVisible = true">添加职业模版</a-button>
-    <a-button @click="addClass">添加人物职业</a-button>
+    <div class="button-group">
+        <a-button @click="() => createClassDialogVisible = true">添加职业模版</a-button>
+        <a-button @click="addClass">添加人物职业</a-button>
+    </div>
 
     <div v-for="(c, i) in props.modelValue" :key="i">
-        <a-form-item>
-            <a-select @change="emit('select')" v-model:value="c.name" show-search :options="classOptions">
-            </a-select>
-        </a-form-item>
-        <a-form-item label="职业等级">
-            <a-input-number v-model:value="c.level"></a-input-number>
-        </a-form-item>
+        <a-form layout="inline">
+            <a-form-item class="cg-input__fix">
+                <a-select @change="emit('select')" v-model:value="c.name" show-search :options="classOptions">
+                </a-select>
+            </a-form-item>
+            <a-form-item label="职业等级" class="cg-input__base_short">
+                <a-input-number v-model:value="c.level"></a-input-number>
+            </a-form-item>
+            <a-form-item>
+                <a-button @click="props.modelValue.splice(i, 1)">删除</a-button>
+            </a-form-item>
+        </a-form>
     </div>
 
     <a-modal
