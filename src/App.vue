@@ -4,6 +4,7 @@ import Card from './views/Card.vue'
 import PC from './core/Character'
 import T from './core/template/index.js'
 import LZUTF8 from 'lzutf8';
+import { message } from 'ant-design-vue';
 
 
 const pc = ref(new PC())
@@ -102,8 +103,27 @@ HP {{hitPoint}}
 let t = ref(new T(template))
 
 const card = computed(() => t.value && t.value.render(pc.value.print()))
+
+let history = ref([])
+try {
+  history.value = JSON.parse(localStorage.getItem('history')) || []
+} catch(e) {
+  console.log('读取历史信息失败！')
+}
+function deleteHistory(i) {
+  history.value.splice(i, 1)
+  saveHistory()
+}
+function saveHistory() {
+  localStorage.setItem('history', JSON.stringify(history.value))
+}
+function addHistory(value) {
+  history.value.push(value)
+  saveHistory()
+}
+
 const fingerprint = computed(() => LZUTF8.compress(
-      new TextEncoder('utf-8').encode(JSON.stringify(pc.value.print()), 'utf8'),
+      new TextEncoder('utf-8').encode(JSON.stringify(pc.value), 'utf8'),
       {outputEncoding: 'Base64'}
   ))
 
@@ -120,22 +140,18 @@ function handleCreate() {
   a.href = URL.createObjectURL(blob);
   a.download = pc.value.name + '.txt';
 
-  let history = JSON.parse(localStorage.getItem('history'))
-  const compressed = LZUTF8.compress(
-      new TextEncoder('utf-8').encode(pc.value.print(), 'utf8'),
-      {outputEncoding: 'Base64'}
-  )
-  if (history) {
-    history.push(compressed)
-  } else {
-    history = [compressed]
+  try {
+    addHistory(pc.value)
+  } catch(e) {
+    message.warn('储存失败!')
   }
 
-  localStorage.setItem('history', JSON.stringify(history))
   a.click()
 }
 
 const importDialogVisible = ref(false)
+const historyDialogVisible = ref(false)
+
 const importFingerprint = ref('')
 function importCard(fingerprint) {
   const data = LZUTF8.decompress(
@@ -153,6 +169,7 @@ function importCard(fingerprint) {
   <div>
     <a-button @click="handleCreate">生成人物卡</a-button>
     <a-button @click="() => importDialogVisible=true">从指纹导入人物卡</a-button>
+    <a-button @click="() => historyDialogVisible=true">历史人物卡</a-button>
   </div>
   <div class="wrapper">
     <div>
@@ -171,6 +188,26 @@ function importCard(fingerprint) {
     @ok="importCard"
   >
     <a-textarea v-model:value="importFingerprint"></a-textarea>
+  </a-modal>
+  <a-modal
+    v-model:visible="historyDialogVisible"
+    title="历史人物卡"
+    @ok="() => historyDialogVisible = false"
+  >
+    <div>最多保存20张。一旦清除游览器缓存便会清空</div>
+    <div v-if="!history.length">还没有创建人物卡</div>
+    <div v-for="(c, i) in history" :key="i">
+      {{c.name}}
+      <a-button size="small" @click="() => pc.import(c)">恢复</a-button>
+      <a-popconfirm
+        title="确认删除吗？"
+        ok-text="是"
+        cancel-text="否"
+        @confirm="() => deleteHistory(i)"
+      >
+        <a-button size="small" danger>删除</a-button>
+      </a-popconfirm>
+    </div>
   </a-modal>
 </template>
 

@@ -40,8 +40,8 @@ export default class Character {
     size = 'medium'
     level = 0
     classHitPoint = 0
-    height = 0
-    selfWeight = 0
+    height = 5
+    selfWeight = 100
     STRENGTH = new Ability(Abilities.STR)
     DEXTERITY = new Ability(Abilities.DEX)
     CONSTITUTION = new Ability(Abilities.CON)
@@ -148,20 +148,11 @@ export default class Character {
         return rst
     }
     import(o) {
-        o.class = o.class.split('|').map(i => {
-            const rst = {}
-            const [name, level] = i.split('*')
-            rst.name = name
-            rst.level = level
-            return rst
-        })
-        delete o.skills
         Object.values(Abilities).forEach(n => {
             const origin = o[n]
             o[n] = new Ability(n)
             o[n].inject(origin)
         })
         Object.assign(this, o)
-
     }
 }

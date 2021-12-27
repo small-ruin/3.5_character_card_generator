@@ -194,8 +194,8 @@ watchEffect(() => {
           </a-form-item>
           <a-form-item label="性别"><a-input v-model:value="form.sex"/></a-form-item>
           <a-form-item label="年龄"><a-input v-model:value="form.age"/></a-form-item>
-          <a-form-item label="身高"><a-input-number v-model:value="form.height"/>尺</a-form-item>
-          <a-form-item label="体重"><a-input-number v-model:value="form.selfWeight"/>磅</a-form-item>
+          <a-form-item label="身高"><a-input-number v-model:value="form.height" step="0.1" />尺</a-form-item>
+          <a-form-item label="体重"><a-input-number v-model:value="form.selfWeight" />磅</a-form-item>
           <a-form-item label="阵营">
             <a-select v-model:value="form.align">
               <a-select-option v-for="a in aligns" :key="a.value" :value="a.value">{{a.label}}</a-select-option>
