@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, watchEffect } from "vue";
+import { ref, computed, watch, watchEffect, nextTick } from "vue";
 import { message } from 'ant-design-vue';
 import { getWeightByStr, aligns, sizes, sizeModifyMap, SaveType, allSkills, AbilityNameMap  } from '../core'
 import CharacterClass, { getClassByName } from '../core/Class'
@@ -74,20 +74,18 @@ const totalRefSave = computed(() => refSave.value + form.value.otherRefSave + fo
 const totalWillSave = computed(() => willSave.value + form.value.otherWillSave + form.value.WISDOM.modify)
 
 const skillMax = computed(() => characterClasses.value.reduce((p, c) => p + c.level || 0, 3))
-
-const classSkills = computed(() => {
-  const rst = {}
-
-  characterClasses.value.forEach(c => {
-    c.skills.forEach(s => {
-      if (!rst[s.name]) {
-        rst[s.name] = true
-      }
+const classSkills = computed({
+  get: () => form.value.classSkills,
+  set: (v) => form.value.classSkills = v
+})
+const resetClassSkills = function() {
+  nextTick(() => {
+    classSkills.value = {}
+    characterClasses.value.forEach(c => {
+      c.skills.forEach(s => !(s in classSkills.value) && (classSkills.value[s.name] = true))
     })
   })
-
-  return rst
-})
+}
 
 const skillPoints = computed(() => {
   let points = 0
@@ -115,7 +113,7 @@ const usedSkillPoints = computed(() => {
 
 const levelUpExp = computed(() => {
     const level = form.value.class.reduce((p, c) => c.level + p, 0)
-    return Math.round((level * level - level)*500) + 1000*level
+    return Math.round(500*level*level + 1500*level + 1000)
 })
 
 function handleSkillInputChange(p, skill) {
@@ -165,7 +163,7 @@ const totalAc = computed(() => form.value.ac.armor + form.value.ac.dex + form.va
 const touchAc = computed(() => form.value.ac.dex + 10)
 const flatFootAc = computed(() => form.value.ac.armor + 10 + form.value.ac.other)
 const init = computed(() => form.value.otherInit + form.value.DEXTERITY.modify)
-const grab = computed(() => sizeModifyMap[form.value.size] * 4 + form.value.DEXTERITY.modify + bab.value + form.value.otherGrab)
+const grab = computed(() => sizeModifyMap[form.value.size] * 4 + form.value.STRENGTH.modify + bab.value + form.value.otherGrab)
 
 watchEffect(() => {
   const map = {
@@ -207,7 +205,9 @@ watchEffect(() => {
         </a-form>
       </a-collapse-panel>
       <a-collapse-panel key="class" header="职业">
-        <class v-model="form.class" :custom-class="customClass"></class>
+        <class
+          v-model="form.class" :custom-class="customClass"
+          @select="resetClassSkills"></class>
       </a-collapse-panel>
       <a-collapse-panel key="abilities" header="属性">
         <a-form :model="form">
@@ -320,9 +320,9 @@ watchEffect(() => {
               :min="0"
             ></a-input-number>
         </a-form-item>
-        <a-form-item>剩余技能点数：{{skillPoints - usedSkillPoints}}</a-form-item>
+        <a-form-item>剩余技能点数：{{skillPoints - usedSkillPoints}}/{{skillPoints}}</a-form-item>
         <a-form-item v-for="s in allSkills" :key="s.name" :label="s.name">
-            <span v-if="s.name in classSkills">本职技能</span>
+            <a-checkbox v-model:checked="classSkills[s.name]">本职技能</a-checkbox>
             <span>{{s.getPoint(
               abilityModifiers,
               form.skills[s.name],
@@ -335,8 +335,12 @@ watchEffect(() => {
               :max="skillMax"
               :min="0"
               ></a-input-number>
+              <span v-if="form.skills[s.name].point">({{s.name in classSkills && classSkills[s.name]
+                  ? form.skills[s.name].point
+                  : Math.floor(form.skills[s.name].point / 2)}})</span>
             + {{abilityModifiers[s.baseAbility]}}{{AbilityNameMap[s.baseAbility]}}
             + <a-input-number v-model:value="form.skills[s.name].other"></a-input-number>其它
+            {{s.armor ? `- ${s.armor * form.armorSkillModify}盔甲减值` : ''}}
 
         </a-form-item>
       </a-collapse-panel>

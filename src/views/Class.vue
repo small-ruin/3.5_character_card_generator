@@ -7,11 +7,15 @@ const props = defineProps({
     modelValue: Object,
     customClass: Array,
 })
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits([
+    'update:modelValue',
+    'addClass',
+    'select'
+])
 
 const customClass = props.customClass
 
-const addClassDialogVisible = ref(false)
+const createClassDialogVisible = ref(false)
 const currentAddingClass = ref({})
 const classOptions = computed(
     () => Object.values(classes)
@@ -21,22 +25,26 @@ const classOptions = computed(
 
 useModelWrapper(props, emit)
 
-function addClass() {
+function createClass() {
     currentAddingClass.skills = currentAddingClass.value.skills.map(i => allSkillsMap[i.name])
     const newClass = new Class(currentAddingClass.value.name, currentAddingClass.value)
     customClass.push(newClass)
     currentAddingClass.value = { level: 1 }
-    addClassDialogVisible.value = false
+    createClassDialogVisible.value = false
+}
+function addClass() {
+    props.modelValue.push({ level: 1 })
+    emit('addClass')
 }
 </script>
 
 <template>
-    <a-button @click="() => addClassDialogVisible = true">添加职业模版</a-button>
-    <a-button @click="() => props.modelValue.push({ level: 1 })">添加人物职业</a-button>
+    <a-button @click="() => createClassDialogVisible = true">添加职业模版</a-button>
+    <a-button @click="addClass">添加人物职业</a-button>
 
     <div v-for="(c, i) in props.modelValue" :key="i">
         <a-form-item>
-            <a-select v-model:value="c.name" show-search :options="classOptions">
+            <a-select @change="emit('select')" v-model:value="c.name" show-search :options="classOptions">
             </a-select>
         </a-form-item>
         <a-form-item label="职业等级">
@@ -45,9 +53,9 @@ function addClass() {
     </div>
 
     <a-modal
-        v-model:visible="addClassDialogVisible"
+        v-model:visible="createClassDialogVisible"
         title="新增职业模版"
-        @ok="addClass">
+        @ok="createClass">
         <a-form :model="currentAddingClass">
             <a-form-item label="名称"><a-input v-model:value="currentAddingClass.name"/></a-form-item>
             <a-form-item label="生命骰面数">

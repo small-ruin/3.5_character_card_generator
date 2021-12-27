@@ -57,6 +57,7 @@ export default class Character {
     weight = 0
     weightDetail = '轻载'
     skills = {}
+    classSkills = {}
     armorSkillModify = 0
     class = [{ level: 1 }]
     fates = [{}]
