@@ -166,10 +166,13 @@ function importCard(fingerprint) {
 </script>
 
 <template>
-  <div>
-    <a-button @click="handleCreate">生成人物卡</a-button>
-    <a-button @click="() => importDialogVisible=true">从指纹导入人物卡</a-button>
-    <a-button @click="() => historyDialogVisible=true">历史人物卡</a-button>
+  <div class="nav">
+    <div class="button-group">
+      <a-button style="background:#FEDFE1; color:#08192D" type="primary" @click="handleCreate">生成人物卡</a-button>
+      <a-button @click="() => importDialogVisible=true">从指纹导入人物卡</a-button>
+      <a-button @click="() => historyDialogVisible=true">历史人物卡</a-button>
+    </div>
+    D&D 3.5 人物卡生成器
   </div>
   <div class="wrapper">
     <div>
@@ -181,7 +184,6 @@ function importCard(fingerprint) {
 {{ fingerprint }}
     </pre>
   </div>
-  <div><a-button @click="handleCreate">生成人物卡</a-button></div>
   <a-modal
     v-model:visible="importDialogVisible"
     title="从指纹导入"
@@ -218,10 +220,21 @@ function importCard(fingerprint) {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
+  overflow: hidden;
+}
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #08192D;
+  color: #eee;
+  font-weight: 600;
+  font-size: 14px;
 }
 .wrapper {
   display: flex;
-  height: 100%;
+  height: calc(100% - 32px);
 }
 .wrapper > div {
   height: 100%;
