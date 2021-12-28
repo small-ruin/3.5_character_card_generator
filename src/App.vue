@@ -232,4 +232,14 @@ pre {
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+
+@media only screen and (max-width: 768px) {
+    .wrapper {
+      flex-direction: column;
+      height: auto;
+    }
+    pre {
+      max-width: 100%;
+    }
+}
 </style>
