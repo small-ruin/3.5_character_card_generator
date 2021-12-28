@@ -35,9 +35,9 @@ const template = `
 HP {{hitPoint}}
 防御等级 {{totalAc}}，接触 {{touchAc}}，措手不及 {{flatFootAc}}
 
-先攻调整      {{init}}
-基本攻击加值  {{bab}}
-擒抱          {{grab}}
+先攻调整		{{init}}
+基本攻击加值	{{bab}}
+擒抱		{{grab}}
 
 平常速度{{speed}}尺 奔跑速度{{runSpeed}}尺
 ****************************************************************************
@@ -48,7 +48,7 @@ HP {{hitPoint}}
 意志豁免    {{totalWillSave}} （{{WISDOM.modify}}感知修正+{{willSave}}职业+{{otherWIllSave}}其它）
 ****************************************************************************
 攻击：
-{% for a in attacks %}{{a.name}} 攻击：{{a.attackRoll}} 伤害：{{a.damage}} 重击：{{a.critical}} 射程：{{a.range}}
+{% for a in attacks %}{{a.name}} 攻击：{{a.attackRoll}}, 伤害：{{a.damage}}, 重击：{{a.critical}}, 射程：{{a.range}}
 
 {% endfor %}
 ****************************************************************************
@@ -69,8 +69,8 @@ HP {{hitPoint}}
 {% endfor %}
 ***************************************************************************
 技能点：{{skillPoints}}
-技能  分配点数  最终值{% for s in skills %}
-{{s.isClassSkill}}{{s.name}}{{s.canUseUntrained}}  （{{s.point}}）      {{s.total}}{% endfor %}
+技能	分配点数	最终值{% for s in skills %}
+{{s.isClassSkill}}{{s.name}}{{s.canUseUntrained}}	（{{s.point}}）	{{s.total}}{% endfor %}
 
 * 非受训技能
 √ 本职技能
@@ -214,6 +214,21 @@ function importCard(fingerprint) {
 </template>
 
 <style>
+::-webkit-scrollbar {
+    width: 6px;
+    height: 8px;
+}
+::-webkit-scrollbar-button {
+    background: #ccc
+}
+::-webkit-scrollbar-track-piece {
+    background: #eee
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: #aaa
+}
+
 #app {
   height: 100%;
   font-family: Avenir, Helvetica, Arial, sans-serif;
