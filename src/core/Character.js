@@ -60,6 +60,7 @@ export default class Character {
     classSkills = {}
     armorSkillModify = 0
     class = [{ level: 1 }]
+    customClass = []
     fates = [{}]
     items = [{}]
     spells = [{}]

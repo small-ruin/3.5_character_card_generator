@@ -1,11 +1,11 @@
 <script setup>
 import { ref, computed } from '@vue/reactivity'
 import Card from './views/Card.vue'
+import { LocalStorage } from './core'
 import PC from './core/Character'
 import T from './core/template/index.js'
 import LZUTF8 from 'lzutf8';
 import { message } from 'ant-design-vue';
-
 
 const pc = ref(new PC())
 const template = `
@@ -104,23 +104,7 @@ let t = ref(new T(template))
 
 const card = computed(() => t.value && t.value.render(pc.value.print()))
 
-let history = ref([])
-try {
-  history.value = JSON.parse(localStorage.getItem('history')) || []
-} catch(e) {
-  console.log('读取历史信息失败！')
-}
-function deleteHistory(i) {
-  history.value.splice(i, 1)
-  saveHistory()
-}
-function saveHistory() {
-  localStorage.setItem('history', JSON.stringify(history.value))
-}
-function addHistory(value) {
-  history.value.push(value)
-  saveHistory()
-}
+let history = ref(new LocalStorage('history'))
 
 const fingerprint = computed(() => LZUTF8.compress(
       new TextEncoder('utf-8').encode(JSON.stringify(pc.value), 'utf8'),
@@ -141,7 +125,7 @@ function handleCreate() {
   a.download = pc.value.name + '.txt';
 
   try {
-    addHistory(pc.value)
+    history.value.add(pc.value)
   } catch(e) {
     message.warn('储存失败!')
   }
@@ -153,15 +137,22 @@ const importDialogVisible = ref(false)
 const historyDialogVisible = ref(false)
 
 const importFingerprint = ref('')
-function importCard(fingerprint) {
-  const data = LZUTF8.decompress(
-      importFingerprint.value,
-      {inputEncoding: 'Base64'}
-  )
+function importCard() {
+  try {
+    const data = LZUTF8.decompress(
+        importFingerprint.value,
+        {inputEncoding: 'Base64'}
+    )
+  
+    pc.value.import(JSON.parse(data))
 
-  pc.value.import(JSON.parse(data))
+    importDialogVisible.value = false
+    importFingerprint.value = ''
+  } catch(e) {
+    message.error('导入出错!该指纹无效')
+    console.log(e, importFingerprint.value)
+  }
 
-  console.log(data)
 }
 </script>
 
@@ -169,8 +160,8 @@ function importCard(fingerprint) {
   <div class="nav">
     <div class="button-group">
       <a-button style="background:#FEDFE1; color:#08192D" type="primary" @click="handleCreate">生成人物卡</a-button>
-      <a-button @click="() => importDialogVisible=true">从指纹导入人物卡</a-button>
       <a-button @click="() => historyDialogVisible=true">历史人物卡</a-button>
+      <a-button @click="() => importDialogVisible=true">从指纹导入人物卡</a-button>
     </div>
     D&D 3.5 人物卡生成器
   </div>
@@ -188,6 +179,7 @@ function importCard(fingerprint) {
     v-model:visible="importDialogVisible"
     title="从指纹导入"
     @ok="importCard"
+    @cancel="importFingerprint = ''"
   >
     <a-textarea v-model:value="importFingerprint"></a-textarea>
   </a-modal>
@@ -197,15 +189,15 @@ function importCard(fingerprint) {
     @ok="() => historyDialogVisible = false"
   >
     <div>最多保存20张。一旦清除游览器缓存便会清空</div>
-    <div v-if="!history.length">还没有创建人物卡</div>
-    <div v-for="(c, i) in history" :key="i">
+    <div v-if="!history.data.length">还没有创建人物卡</div>
+    <div v-for="(c, i) in history.data" :key="i">
       {{c.name}}
       <a-button size="small" @click="() => pc.import(c)">恢复</a-button>
       <a-popconfirm
         title="确认删除吗？"
         ok-text="是"
         cancel-text="否"
-        @confirm="() => deleteHistory(i)"
+        @confirm="() => history.delete(i)"
       >
         <a-button size="small" danger>删除</a-button>
       </a-popconfirm>

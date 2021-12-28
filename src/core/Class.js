@@ -20,7 +20,8 @@ export default class Class {
         willSave,
         bab,
         skills,
-        skillPointsEachLevel
+        skillPointsEachLevel,
+        isCustom = false
     }) {
         this.name = name
         this.hitDice = hitDice,
@@ -30,6 +31,7 @@ export default class Class {
         this.bab = bab
         this.skills = skills
         this.skillPointsEachLevel = skillPointsEachLevel
+        this.isCustom = isCustom
     }
 
     toString() { return this.name }

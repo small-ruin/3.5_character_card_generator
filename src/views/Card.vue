@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, watchEffect, nextTick } from "vue";
 import { message } from 'ant-design-vue';
-import { getWeightByStr, aligns, sizes, sizeModifyMap, SaveType, allSkills, AbilityNameMap  } from '../core'
+import { getWeightByStr, aligns, sizes, sizeModifyMap, SaveType, allSkills, AbilityNameMap, LocalStorage  } from '../core'
 import CharacterClass, { getClassByName } from '../core/Class'
 import Class from './Class.vue'
 
@@ -26,20 +26,24 @@ const abilityModifiers = computed(() => {
 })
 
 const activeKey = ref(['base', 'class', 'abilities', 'skills', 'fates', 'traits', 'items', 'spells', 'attacks', 'armors'])
-const customClass = ref([])
+const customClass = ref(new LocalStorage('customClass'))
 
 function safeGetClass(c) {
     if (!c.name) return null
     const level = c.level
     if (!(c instanceof CharacterClass)) {
-        let cc = customClass.value.find(cc => cc.name === c.name)
+        let cc = customClass.value.data.find(cc => cc.name === c.name)
+          || form.value.customClass.find(cc => cc.name === c.name)
         if (cc) {
           c = cc
         } else {
           c = getClassByName(c.name)
-          c.level = level
         }
     }
+    if (!c) {
+      message.error('获取职业信息失败！请联系开发者')
+    }
+    c.level = level
     return c
 }
 const characterClasses = computed(() => form.value.class.filter(i => i.name).map(c => safeGetClass(c)))
@@ -166,6 +170,7 @@ const init = computed(() => form.value.otherInit + form.value.DEXTERITY.modify)
 const grab = computed(() => sizeModifyMap[form.value.size] * 4 + form.value.STRENGTH.modify + bab.value + form.value.otherGrab)
 
 watchEffect(() => {
+  // 挂入需要的数据
   const map = {
     bab, fortSave, refSave, willSave,
     skillMax, skillPoints, usedSkillPoints,
@@ -176,6 +181,12 @@ watchEffect(() => {
     classSkills, abilityModifiers, weightLimit
   }
   Object.keys(map).forEach(k => form.value.set(k, map[k].value))
+
+  // 挂入职业模版
+  const customClass = characterClasses.value.filter(i => i.isCustom)
+  if (customClass.length) {
+    form.value.customClass = customClass
+  }
 })
 </script>
 

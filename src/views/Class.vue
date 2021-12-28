@@ -16,19 +16,21 @@ const emit = defineEmits([
 const customClass = props.customClass
 
 const createClassDialogVisible = ref(false)
+const classTemplateDialogVisible = ref(false)
 const currentAddingClass = ref({})
 const classOptions = computed(
     () => Object.values(classes)
         .map(cl => ({label: cl.name, value: cl.name}))
-        .concat(customClass ? customClass.map(i => ({label: i.name, value: i.name})) : [])
+        .concat(customClass ? customClass.data.map(i => ({label: i.name, value: i.name})) : [])
 )
 
 useModelWrapper(props, emit)
 
 function createClass() {
-    currentAddingClass.skills = currentAddingClass.value.skills.map(i => allSkillsMap[i.name])
+    currentAddingClass.value.isCustom = true
     const newClass = new Class(currentAddingClass.value.name, currentAddingClass.value)
-    customClass.push(newClass)
+    customClass.add(newClass)
+
     currentAddingClass.value = { level: 1 }
     createClassDialogVisible.value = false
 }
@@ -40,8 +42,9 @@ function addClass() {
 
 <template>
     <div class="button-group">
+        <a-button type="primary" @click="addClass">添加人物职业</a-button>
         <a-button @click="() => createClassDialogVisible = true">添加职业模版</a-button>
-        <a-button @click="addClass">添加人物职业</a-button>
+        <a-button @click="() => classTemplateDialogVisible = true">查看已有职业模版</a-button>
     </div>
 
     <div v-for="(c, i) in props.modelValue" :key="i">
@@ -113,5 +116,22 @@ function addClass() {
                 <a-input-number v-model:value="currentAddingClass.skillPointsEachLevel"></a-input-number>
             </a-form-item>
         </a-form>
+    </a-modal>
+    <a-modal
+        v-model:visible="classTemplateDialogVisible"
+        title="职业模版"
+        @ok="classTemplateDialogVisible = false">
+        <div v-if="!customClass.data.length">没有职业模版</div>
+        <div v-for="(c, i) in customClass.data" :key="i">
+            {{c.name}}
+            <a-popconfirm
+                title="确认删除吗？"
+                ok-text="是"
+                cancel-text="否"
+                @confirm="() => customClass.delete(i)"
+            >
+                <a-button size="small" danger>删除</a-button>
+            </a-popconfirm>
+        </div>
     </a-modal>
 </template>
