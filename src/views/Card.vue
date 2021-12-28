@@ -212,7 +212,7 @@ watchEffect(() => {
       <a-collapse-panel key="abilities" header="属性">
         <a-form :model="form">
           <a-form-item label="生命值">
-            {{hitPoint}}=
+            <span class="number__result">{{hitPoint}}</span>=
             <a-input-number v-model:value="form.classHitPoint"></a-input-number>{{
               characterClasses.length
               ? '(' + characterClasses
@@ -222,66 +222,75 @@ watchEffect(() => {
             }}{{form.CONSTITUTION.modify ? `+${form.CONSTITUTION.modify}*${level}` : ''}}
           </a-form-item>
           <a-form-item label="力量">
-            {{form.STRENGTH.ability}}=
+            <span class="number__result">{{form.STRENGTH.ability}}</span>=
             <a-input-number v-model:value="form.STRENGTH.base"/>初始值
             + <a-input-number v-model:value="form.STRENGTH.race" />种族调整
             + <a-input-number v-model:value="form.STRENGTH.other"/>其它调整
           </a-form-item>
           <a-form-item label="敏捷">
-            {{form.DEXTERITY.ability}}=
+            <span class="number__result">{{form.DEXTERITY.ability}}</span>=
             <a-input-number v-model:value="form.DEXTERITY.base"/>初始值
             + <a-input-number v-model:value="form.DEXTERITY.race" />种族调整
             + <a-input-number v-model:value="form.DEXTERITY.other"/>其它调整
           </a-form-item>
           <a-form-item label="体质">
-            {{form.CONSTITUTION.ability}}=
+            <span class="number__result">{{form.CONSTITUTION.ability}}</span>=
             <a-input-number v-model:value="form.CONSTITUTION.base"/>初始值
             + <a-input-number v-model:value="form.CONSTITUTION.race" />种族调整
             + <a-input-number v-model:value="form.CONSTITUTION.other"/>其它调整
           </a-form-item>
           <a-form-item label="智力">
-            {{form.INTELLIGENCE.ability}}=
+            <span class="number__result">{{form.INTELLIGENCE.ability}}</span>=
             <a-input-number v-model:value="form.INTELLIGENCE.base"/>初始值
             + <a-input-number v-model:value="form.INTELLIGENCE.race" />种族调整
             + <a-input-number v-model:value="form.INTELLIGENCE.other"/>其它调整
           </a-form-item>
           <a-form-item label="感知">
-            {{form.WISDOM.ability}}=
+            <span class="number__result">{{form.WISDOM.ability}}</span>=
             <a-input-number v-model:value="form.WISDOM.base"/>初始值
             + <a-input-number v-model:value="form.WISDOM.race" />种族调整
             + <a-input-number v-model:value="form.WISDOM.other"/>其它调整
           </a-form-item>
           <a-form-item label="魅力">
-            {{form.CHARISMA.ability}}=
+            <span class="number__result">{{form.CHARISMA.ability}}</span>=
             <a-input-number v-model:value="form.CHARISMA.base"/>初始值
             + <a-input-number v-model:value="form.CHARISMA.race" />种族调整
             + <a-input-number v-model:value="form.CHARISMA.other"/>其它调整
           </a-form-item>
         
-          <a-form-item label="bab">{{bab}}</a-form-item>
+          <a-form-item label="bab"><span class="number__result">{{bab}}</span></a-form-item>
           <a-form-item label="ac">
-            {{totalAc}} = 10+
+            <span class="number__result">{{totalAc}}</span> = <span class="number__common">10</span>+
               <a-input-number v-model:value="form.ac.armor"></a-input-number>盔甲及盾牌+
               <a-input-number v-model:value="form.ac.dex"></a-input-number>敏捷+
               <a-input-number v-model:value="form.ac.other"></a-input-number>其它
               <br />
-            接触：{{touchAc}} 措手不及：{{flatFootAc}}
+            接触：<span class="number__common">{{touchAc}}</span> 措手不及：<span class="number__common">{{flatFootAc}}</span>
           </a-form-item>
           <a-form-item label="先攻">
-            {{init}}={{form.DEXTERITY.modify}}敏捷
+            <span class="number__result">{{init}}</span>=<span class="number__common">{{form.DEXTERITY.modify}}</span>敏捷
             +<a-input-number v-model:value="form.otherInit"></a-input-number>其它
           </a-form-item>
           <a-form-item label="擒抱">
-            {{grab}}={{bab}}bab+{{form.STRENGTH.modify}}力量+{{sizeModifyMap[form.size] * 4}}体型+
-          <a-input-number v-model:value="form.otherGrab"></a-input-number>其它
+            <span class="number__result">{{grab}}</span>
+            = <span class="number__common">{{bab}}</span>bab
+            + <span class="number__common">{{form.STRENGTH.modify}}</span>力量
+            + <span class="number__common">{{sizeModifyMap[form.size] * 4}}</span>体型
+            + <a-input-number v-model:value="form.otherGrab"></a-input-number>其它
           </a-form-item>
           <a-form-item label="强韧豁免">
-            {{totalFortSave}}={{fortSave}}基础 + <a-input-number v-model:value="form.otherFortSave"></a-input-number>其它
+            <span class="number__result">{{totalFortSave}}</span>
+            = <span class="number__common">{{fortSave}}</span>基础
+            + <a-input-number v-model:value="form.otherFortSave"></a-input-number>其它
           </a-form-item>
           <a-form-item label="反射豁免">
-            {{totalRefSave}}={{refSave}}基础 + <a-input-number v-model:value="form.otherRefSave"></a-input-number>其它</a-form-item>
+            <span class="number__result">{{totalRefSave}}</span>
+            = <span class="number__common">{{refSave}}</span>基础
+            + <a-input-number v-model:value="form.otherRefSave"></a-input-number>其它</a-form-item>
           <a-form-item label="意志豁免">
-            {{totalWillSave}}={{willSave}}基础 + <a-input-number v-model:value="form.otherWillSave"></a-input-number>其它</a-form-item>
+            <span class="number__result">{{totalWillSave}}</span>
+            = <span class="number__common">{{willSave}}</span>基础
+            + <a-input-number v-model:value="form.otherWillSave"></a-input-number>其它</a-form-item>
           <a-form-item label="速度">
             <a-input-number v-model:value="form.speed"></a-input-number>
             奔跑<a-input-number v-model:value="form.runSpeed"></a-input-number>
@@ -299,7 +308,7 @@ watchEffect(() => {
       </a-collapse-panel>
       <a-collapse-panel key="armors" header="盔甲" class="section__armor">
           <a-form layout="inline" v-for="(a, i) in form.armors" :key="i">
-            <a-form-item label="名称"><a-input v-model:value="a.name" /></a-form-item>
+            <a-form-item label="名称"><a-input v-model:value="a.name" style="width: 6rem" /></a-form-item>
             <a-form-item label="盔甲和盾牌加值"><a-input-number v-model:value="a.bonus" /></a-form-item>
             <a-form-item label="最大敏捷加值"><a-input-number v-model:value="a.maxDex" /></a-form-item>
             <a-form-item label="防具检定减值"><a-input-number v-model:value="a.checkPenalty" /></a-form-item>
@@ -307,7 +316,7 @@ watchEffect(() => {
             <a-form-item label="速度"><a-input-number v-model:value="a.speed" />尺</a-form-item>
           </a-form>
       </a-collapse-panel>
-      <a-collapse-panel key="skills" header="技能">
+      <a-collapse-panel class="section__skills" key="skills" header="技能">
         <a-form-item label="种族奖励技能点">
             <a-input-number
               v-model:value="form.raceSkillPoint"
@@ -323,7 +332,7 @@ watchEffect(() => {
         <a-form-item>剩余技能点数：{{skillPoints - usedSkillPoints}}/{{skillPoints}}</a-form-item>
         <a-form-item v-for="s in allSkills" :key="s.name" :label="s.name">
             <a-checkbox v-model:checked="classSkills[s.name]">本职技能</a-checkbox>
-            <span>{{s.getPoint(
+            <span class="number__result">{{s.getPoint(
               abilityModifiers,
               form.skills[s.name],
               classSkills[s.name],
@@ -335,46 +344,49 @@ watchEffect(() => {
               :max="skillMax"
               :min="0"
               ></a-input-number>
-              <span v-if="form.skills[s.name].point">({{s.name in classSkills && classSkills[s.name]
+              <span class="number__common" v-if="form.skills[s.name].point">({{s.name in classSkills && classSkills[s.name]
                   ? form.skills[s.name].point
                   : Math.floor(form.skills[s.name].point / 2)}})</span>
-            + {{abilityModifiers[s.baseAbility]}}{{AbilityNameMap[s.baseAbility]}}
+            + <span class="number__common">{{abilityModifiers[s.baseAbility]}}</span>{{AbilityNameMap[s.baseAbility]}}
             + <a-input-number v-model:value="form.skills[s.name].other"></a-input-number>其它
-            {{s.armor ? `- ${s.armor * form.armorSkillModify}盔甲减值` : ''}}
-
+            <span class="number__common">{{s.armor ? `- ${s.armor * form.armorSkillModify}` : ''}}</span>{{s.armor ? '盔甲减值' : '' }}
         </a-form-item>
       </a-collapse-panel>
       <a-collapse-panel key="fates" header="专长">
-        <a-form-item v-for="(f, i) in form.fates" :key="i">
+        <a-form-item class="section-content__item" v-for="(f, i) in form.fates" :key="i">
           <a-input placeholder="专长名" v-model:value="f.name" />
           <a-textarea placeholder="专长描述(非必填)" v-model:value="f.describe"></a-textarea>
         </a-form-item>
       </a-collapse-panel>
       <a-collapse-panel key="traits" header="种族特性与职业能力">
-        <a-form-item v-for="(t, i) in form.traits" :key="i">
+        <a-form-item class="section-content__item" v-for="(t, i) in form.traits" :key="i">
           <a-input placeholder="特性" v-model:value="t.name" />
           <a-textarea placeholder="描述(非必填)" v-model:value="t.describe"></a-textarea>
         </a-form-item>
       </a-collapse-panel>
       <a-collapse-panel key="items" header="物品">
-        <a-form-item v-for="(it, i) in form.items" :key="i">
-          <a-input placeholder="物品名称" v-model:value="it.name" />
-          <a-input-number v-model:value="it.count" />数量
-          <a-input placeholder="价格" v-model:value="it.price"></a-input>
-          <a-input placeholder="重量" v-model:value="it.weight"></a-input>
-          <a-textarea placeholder="备注" v-model:value="it.remark"></a-textarea>
-        </a-form-item>
-        <a-form-item :label="p" :key="p" v-for="p in ['pp', 'gp', 'sp', 'cp']">
+        <a-form layout="inline" v-for="(it, i) in form.items" :key="i">
+          <a-form-item label="物品名称"><a-input v-model:value="it.name" /></a-form-item>
+          <a-form-item label="数量"><a-input-number v-model:value="it.count" /></a-form-item>
+          <a-form-item label="价格"><a-input v-model:value="it.price"></a-input></a-form-item>
+          <a-form-item label="重量"><a-input v-model:value="it.weight"></a-input></a-form-item>
+          <a-form-item label="备注" style="width:100%"><a-textarea v-model:value="it.remark"></a-textarea></a-form-item>
+        </a-form>
+        <a-form-item style="margin-top:1rem" :label="p" :key="p" v-for="p in ['pp', 'gp', 'sp', 'cp']">
           <a-input-number :min="0" v-model:value="form[p]"></a-input-number>
         </a-form-item>
-        <a-form-item>
-          货币：{{form.pp + form.gp + form.sp + form.cp}}枚，
-          {{(form.pp * 10 + form.gp + form.sp / 10 + form.cp / 100).toFixed(2)}}gp，
-          {{coinWeight}}磅
+        <a-form-item label="货币">
+          <span class="number__result">{{form.pp + form.gp + form.sp + form.cp}}</span>枚，
+          <span class="number__result">{{(form.pp * 10 + form.gp + form.sp / 10 + form.cp / 100).toFixed(2)}}</span>gp，
+          <span class="number__result">{{coinWeight}}</span>磅
+        </a-form-item>
+        <a-form-item label="负重">
+          <span class="number__result">{{weight}}磅, {{weightDetail}}</span><br />
         </a-form-item>
         <a-form-item>
-          <p>负重：{{weight}}磅, {{weightDetail}}</p>
-          轻载：{{'<' + weightLimit[0]}} 中载：{{'<' + (weightLimit[1] + 1)}} 重载：{{'<' + (weightLimit[2] + 1)}}
+          轻载：<span class="number__common">{{'<' + weightLimit[0]}}</span>
+          中载：<span class="number__common">{{'<' + (weightLimit[1] + 1)}}</span>
+          重载：<span class="number__common">{{'<' + (weightLimit[2] + 1)}}</span>
         </a-form-item>
 
       </a-collapse-panel>
@@ -397,20 +409,30 @@ watchEffect(() => {
   width: 100%
 }
 .cg-input__fix {
-  width: 200px
+  width: 15rem
 }
 .ant-form-inline .ant-form-item {
-  margin: 20px 0;
+  margin: 1rem 0;
+}
+.number__result {
+  color: #2E5C6E;
+  font-weight: 600;
+  font-size: 14px;
+}
+.number__common {
+  color: #3A8FB7;
+  font-weight: 600;
+  font-size: 14px;
 }
 #app .ant-input-number {
-  width: 50px;
+  width: 4rem;
 }
 #app .ant-form-item-control-input-content, #app .ant-input, #app .ant-form-item-label > label,
 #app .ant-select, #app .ant-btn {
   font-size: 12px;
 }
 #app .ant-form-item-label > label {
-  min-width: 50px;
+  min-width: 4rem;
   justify-content: right;
 }
 .exp .ant-form-item-control-input-content {
@@ -418,12 +440,18 @@ watchEffect(() => {
   align-items: center;
 }
 .button-group .ant-btn{
-  margin-right: 10px;
+  margin-right: 1rem;
 }
 #app .section__armor .ant-form-item-label label {
-  min-width: 40px;
+  min-width: 2rem;
 }
 #app .section__armor .ant-form-inline .ant-form-item {
-  margin-right: 8px;
+  margin-right: 0.3rem;
+}
+#app .section__skills .ant-form-item-label label {
+  min-width: 7rem;
+}
+#app .section-content__item input {
+  margin-bottom: 0.5rem;
 }
 </style>
