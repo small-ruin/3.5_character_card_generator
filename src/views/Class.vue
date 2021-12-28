@@ -1,11 +1,12 @@
 <script setup>
 import { computed, ref } from "@vue/reactivity";
+import { message } from "ant-design-vue";
 import Class, { allSkills, BabType, SaveType, classes, allSkillsMap } from '../core/Class'
 import { useModelWrapper } from '../hooks/useModelWrapper'
 
 const props = defineProps({
     modelValue: Object,
-    customClass: Array,
+    customClass: Object,
 })
 const emit = defineEmits([
     'update:modelValue',
@@ -17,7 +18,10 @@ const customClass = props.customClass
 
 const createClassDialogVisible = ref(false)
 const classTemplateDialogVisible = ref(false)
+const classImportDialogVisible = ref(false)
 const currentAddingClass = ref({})
+const currentImportClass = ref('')
+
 const classOptions = computed(
     () => Object.values(classes)
         .map(cl => ({label: cl.name, value: cl.name}))
@@ -38,6 +42,35 @@ function addClass() {
     props.modelValue.push({ level: 1 })
     emit('addClass')
 }
+function exportClass() {
+    try {
+        const blob = new Blob(
+            [JSON.stringify(customClass.data)],
+            { type: "text/plain;charset=utf-8" }
+        )
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob);
+        a.download = '职业模版.txt';
+        a.click()
+    } catch(e) {
+        message.error('导出失败！')
+        console.log(e, JSON.stringify(customClass.data))
+    }
+}
+function importClass() {
+    try {
+        const data = JSON.parse(currentImportClass.value)
+        const alreadyHaveClass = customClass.data.map(c => c.name)
+        data.forEach(c => {
+            if (!alreadyHaveClass.includes(c.name))
+                customClass.add(c)
+        })
+        classImportDialogVisible.value = false
+    } catch(e) {
+        message.error('导入失败！')
+        console.log(e, currentImportClass.value)
+    }
+}
 </script>
 
 <template>
@@ -45,6 +78,8 @@ function addClass() {
         <a-button type="primary" @click="addClass">添加人物职业</a-button>
         <a-button @click="() => createClassDialogVisible = true">添加职业模版</a-button>
         <a-button @click="() => classTemplateDialogVisible = true">查看已有职业模版</a-button>
+        <a-button @click="() => exportClass()">导出职业模版</a-button>
+        <a-button @click="() => classImportDialogVisible = true">导入职业模版</a-button>
     </div>
 
     <div v-for="(c, i) in props.modelValue" :key="i">
@@ -121,17 +156,27 @@ function addClass() {
         v-model:visible="classTemplateDialogVisible"
         title="职业模版"
         @ok="classTemplateDialogVisible = false">
-        <div v-if="!customClass.data.length">没有职业模版</div>
-        <div v-for="(c, i) in customClass.data" :key="i">
+        <div style="margin-bottom: 1rem" v-if="!customClass.data.length">没有职业模版</div>
+        <div class="history-row" v-for="(c, i) in customClass.data" :key="i">
             {{c.name}}
-            <a-popconfirm
-                title="确认删除吗？"
-                ok-text="是"
-                cancel-text="否"
-                @confirm="() => customClass.delete(i)"
-            >
-                <a-button size="small" danger>删除</a-button>
-            </a-popconfirm>
+            <div class="button-group">
+                <a-popconfirm
+                    title="确认删除吗？"
+                    ok-text="是"
+                    cancel-text="否"
+                    @confirm="() => customClass.delete(i)"
+                >
+                    <a-button size="small" danger>删除</a-button>
+                </a-popconfirm>
+            </div>
         </div>
+    </a-modal>
+    <a-modal
+        v-model:visible="classImportDialogVisible"
+        title="导入职业模版"
+        @ok="importClass"
+        @cancel="currentImportClass = ''"
+    >
+        <a-textarea v-model:value="currentImportClass"></a-textarea>
     </a-modal>
 </template>

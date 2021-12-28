@@ -188,19 +188,21 @@ function importCard() {
     title="历史人物卡"
     @ok="() => historyDialogVisible = false"
   >
-    <div>最多保存20张。一旦清除游览器缓存便会清空</div>
+    <div style="margin-bottom: 1rem">最多保存20张。一旦清除游览器缓存便会清空</div>
     <div v-if="!history.data.length">还没有创建人物卡</div>
-    <div v-for="(c, i) in history.data" :key="i">
+    <div class="history-row" v-for="(c, i) in history.data" :key="i">
       {{c.name}}
-      <a-button size="small" @click="() => pc.import(c)">恢复</a-button>
-      <a-popconfirm
-        title="确认删除吗？"
-        ok-text="是"
-        cancel-text="否"
-        @confirm="() => history.delete(i)"
-      >
-        <a-button size="small" danger>删除</a-button>
-      </a-popconfirm>
+      <div class="button-group">
+        <a-button size="small" @click="() => pc.import(c)">恢复</a-button>
+        <a-popconfirm
+          title="确认删除吗？"
+          ok-text="是"
+          cancel-text="否"
+          @confirm="() => history.delete(i)"
+        >
+          <a-button size="small" danger>删除</a-button>
+        </a-popconfirm>
+      </div>
     </div>
   </a-modal>
 </template>
@@ -251,6 +253,18 @@ pre {
   max-width: 50%;
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+.history-row .button-group {
+  /* margin-left: 2rem; */
+}
+.history-row .button-group .ant-btn {
+  margin-right: 0.3rem;
 }
 
 @media only screen and (max-width: 768px) {
