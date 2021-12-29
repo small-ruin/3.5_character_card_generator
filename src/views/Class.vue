@@ -156,6 +156,7 @@ function importClass() {
         v-model:visible="classTemplateDialogVisible"
         title="职业模版"
         @ok="classTemplateDialogVisible = false">
+        <div>清除游览器缓存也会清空职业模版，记得导出。</div>
         <div style="margin-bottom: 1rem" v-if="!customClass.data.length">没有职业模版</div>
         <div class="history-row" v-for="(c, i) in customClass.data" :key="i">
             {{c.name}}

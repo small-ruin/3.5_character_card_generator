@@ -104,7 +104,7 @@ let t = ref(new T(template))
 
 const card = computed(() => t.value && t.value.render(pc.value.print()))
 
-let history = ref(new LocalStorage('history'))
+let history = ref(new LocalStorage('history', 20))
 
 const fingerprint = computed(() => LZUTF8.compress(
       new TextEncoder('utf-8').encode(JSON.stringify(pc.value), 'utf8'),
@@ -127,7 +127,8 @@ function handleCreate() {
   try {
     history.value.add(pc.value)
   } catch(e) {
-    message.warn('储存失败!')
+    setTimeout(() => message.warn('储存失败!'))
+    console.log(e)
   }
 
   a.click()
@@ -191,7 +192,7 @@ function importCard() {
     <div style="margin-bottom: 1rem">最多保存20张。一旦清除游览器缓存便会清空</div>
     <div v-if="!history.data.length">还没有创建人物卡</div>
     <div class="history-row" v-for="(c, i) in history.data" :key="i">
-      {{c.name}}
+      {{i+1}}. {{c.name}}
       <div class="button-group">
         <a-button size="small" @click="() => pc.import(c)">恢复</a-button>
         <a-popconfirm
@@ -268,6 +269,9 @@ pre {
 }
 
 @media only screen and (max-width: 768px) {
+    #app {
+      overflow: auto;
+    }
     .wrapper {
       flex-direction: column;
       height: auto;

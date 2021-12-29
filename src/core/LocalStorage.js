@@ -2,8 +2,9 @@ import { message } from "ant-design-vue";
 
 export class LocalStorage {
     name = '';
-    constructor(name) {
+    constructor(name, limit) {
         this.name = name
+        this.limit = limit
         try {
             this.data = JSON.parse(localStorage.getItem(name)) || []
         } catch(e) {
@@ -14,7 +15,7 @@ export class LocalStorage {
         }
     }
 
-    save(v) {
+    save() {
         localStorage.setItem(this.name, JSON.stringify(this.data))
     }
     delete(i) {
@@ -22,7 +23,10 @@ export class LocalStorage {
         this.save()
     }
     add(v) {
-        this.data.push(v)
+        if (this.limit && this.data.length > this.limit) {
+            this.data.pop()
+        }
+        this.data.unshift(JSON.parse(JSON.stringify(v)))
         this.save()
     }
 }
