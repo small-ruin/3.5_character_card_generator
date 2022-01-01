@@ -182,6 +182,9 @@ function allNotCheck() {
     pcs.value.forEach(i => i.checked = false)
     monsters.value.forEach(i => i.checked = false)
 }
+function copy(t) {
+    navigator.clipboard.writeText(t)
+}
 
 </script>
 <template>
@@ -213,12 +216,12 @@ function allNotCheck() {
         </div>
         <div>
             其他可能会用到的指令：
-            <pre>sb member list -a</pre>
-            <pre>sb init list -a</pre>
-            <pre>sb on</pre>
-            <pre>sb next</pre>
-            <pre>sb pause</pre>
-            <pre>sb end</pre>
+            <pre @click="() => copy('sb member list')">sb member list -a</pre>
+            <pre @click="() => copy('sb init list -a')">sb init list -a</pre>
+            <pre @click="() => copy('sb on')">sb on</pre>
+            <pre @click="() => copy('sb next')">sb next</pre>
+            <pre @click="() => copy('sb pause')">sb pause</pre>
+            <pre @click="() => copy('sb end')">sb end</pre>
         </div>
     </section>
     <section class="run">
@@ -259,7 +262,7 @@ function allNotCheck() {
                 <a-checkbox v-model:checked="gOption.autoAt">自动@</a-checkbox>
                 <a-input-number v-model:value="gOption.autoJumpTime"></a-input-number>
             </div>
-            <pre>{{command}}</pre>
+            <pre @click="() => copy(command)">{{command}}</pre>
         </div>
     </section>
     <section class="result">
@@ -268,7 +271,7 @@ function allNotCheck() {
         </div>
         <a-button @click="leftTime = 5*60">下回合</a-button>
         <div class="log">
-            <pre v-for="(c, i) in commandHistory" :key="i">{{c}}</pre>
+            <pre @click="() => copy(c)" v-for="(c, i) in commandHistory" :key="i">{{c}}</pre>
         </div>
     </section>
 </div>
