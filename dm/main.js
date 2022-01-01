@@ -1,14 +1,12 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import {
-    AutoComplete, Button, Input, Form, Select, Collapse, Modal, Checkbox, InputNumber, message,
-    Popconfirm
+    Button, Input, Form, Select, Checkbox, InputNumber, message, Popconfirm
 } from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
 
 const cs = [
-    AutoComplete, Button, Input, Form, Select, Collapse, Modal, Checkbox, InputNumber,
-    Popconfirm
+    Button, Input, Form, Select, Checkbox, InputNumber, Popconfirm
 ]
 
 const app = createApp(App)
