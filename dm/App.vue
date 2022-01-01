@@ -17,6 +17,9 @@ const gOption = ref({
     autoJumpTime: 5,
     silent: true
 })
+const damageToTake = ref(0)
+const healToTake = ref(0)
+const ndToTake = ref(0)
 const command = ref('')
 const commandHistory = ref([])
 const leftTime = ref(5 * 60)
@@ -100,11 +103,10 @@ function addMem() {
         ...toAddPcs,
         ...toAddMs
     ]
-    console.log('mems:', mems)
 }
 
-function gAddCommand(m) {
-    let rst = `sb member add ${m.name} -h${m.hp}`
+function gAddCommand(m, isUpdate = false) {
+    let rst = `sb member ${isUpdate ? 'set' : 'add'} ${m.name} -h${m.hp}`
     if (Number.isInteger(m.init)) rst += ` -i${m.init}`
     if (m.pc) rst += ` -q${m.pc}`
     if (Number.isInteger(m.temHp) && m.temHp > 0) rst += ` -t${m.temHp}`
@@ -134,13 +136,31 @@ function gBattleCommand() {
 
     gCommand(rst)
 }
+
+function takeDamage(m) {
+    gCommand(`sb member damage ${m.name} ${damageToTake.value}`)
+}
+function takeHeal(m) {
+    gCommand(`sb member heal ${m.name} ${damageToTake.value}`)
+}
+function takeNd(m) {
+    gCommand(`sb member nd ${m.name} ${damageToTake.value}`)
+}
+function updateMember(m) {
+    gCommand(gAddCommand(m, true))
+}
+function updateCondition(m, c) {
+    gCommand(`sb member condition ${m.name} -c ${c.name} -r ${c.round}`)
+}
+function deleteMember(m, i) {
+    this.mems.splice(i, 1)
+    gCommand(`sb member delete ${m.name}`)
+}
 function gCommand(cmd) {
     if (Array.isArray(cmd)) {
         cmd = cmd.join('\n')
     }
-
     command.value = cmd
-
     commandHistory.value.push(cmd)
 }
 function exchangeSwitch() {
@@ -191,6 +211,15 @@ function allNotCheck() {
             <a-button @click="allCheck">全选</a-button>
             <a-button @click="allNotCheck">全不选</a-button>
         </div>
+        <div>
+            其他可能会用到的指令：
+            <pre>sb member list -a</pre>
+            <pre>sb init list -a</pre>
+            <pre>sb on</pre>
+            <pre>sb next</pre>
+            <pre>sb pause</pre>
+            <pre>sb end</pre>
+        </div>
     </section>
     <section class="run">
         <div class="mem">
@@ -203,16 +232,25 @@ function allNotCheck() {
                     淤伤: <a-input-number v-model:value="m.nd"></a-input-number> 
                     pc: <a-input style="width:200px" v-model:value="m.pc"></a-input>
                     <a-button style="margin-left: 10px" @click="m.conditions.push({name: '', round: 0})" type="primary">增加状态</a-button>
+                    <div class="damage" style="margin: 10px 0">
+                        生成指令：
+                        <a-input-number v-model:value="damageToTake" /><a-button @click="() => takeDamage(m)">受伤</a-button>
+                        <a-input-number v-model:value="healToTake" /><a-button @click="() => takeHeal(m)">治疗</a-button>
+                        <a-input-number v-model:value="ndToTake" /><a-button @click="() => takeNd(m)">受淤伤</a-button>
+                        <a-button @click="() => updateMember(m)">更新</a-button>
+                        <a-button danger @click="() => deleteMember(m, i)">删除</a-button>
+                    </div>
                     <div style="margin: 10px 0" v-for="(c, i) in m.conditions" :key="i">
                         状态: <a-input style="width:200px" v-model:value="c.name"></a-input>
                         轮数: <a-input-number v-model:value="c.round"/>
                         <a-button type="primary" style="margin-left: 10px" @click="m.conditions.splice(i, 1)">-</a-button>
+                        <a-button type="primary" style="margin-left: 10px" @click="() => updateCondition(m, c)">更新</a-button>
                     </div>
                 </a-form-item>
             </a-form>
         </div>
         <div class="commander">
-            <a-button @click="gCommand">生成命令</a-button>
+            <a-button @click="gBattleCommand">生成命令</a-button>
             <a-button @click="exchangeSwitch">交换先攻</a-button>
             <a-button @click="delay">延迟</a-button>
             <div>
@@ -269,5 +307,11 @@ function allNotCheck() {
     margin-top: 30px;
     max-height: 600px;
     overflow: auto;
+}
+.label {
+    margin-bottom: 10px;
+}
+.damage button {
+    margin-left: 2px;
 }
 </style>
