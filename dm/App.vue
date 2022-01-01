@@ -87,7 +87,9 @@ function formatPc(pc) {
         nd: 0,
         pc: null,
         conditions: [],
-        monster: !!pc.monster
+        monster: !!pc.monster,
+        checked: false,
+        origin: pc,
     }
 }
 function addMem() {
@@ -99,10 +101,6 @@ function addMem() {
         ...toAddMs
     ]
     console.log('mems:', mems)
-}
-
-function log(e) {
-    console.log(e)
 }
 
 function gAddCommand(m) {
@@ -119,7 +117,7 @@ function gAddCommand(m) {
     return rst
 }
 
-function gCommand() {
+function gBattleCommand() {
     const { autoReminder, autoAt, autoJump, autoJumpTime } = gOption.value
     let rst =  'sb row \n' + mems.value.reduce((p, c) => p.concat(gAddCommand(c)), []).join('\n')
     rst += '\nsb on'
@@ -134,9 +132,35 @@ function gCommand() {
 
     rst += ` -t${autoJumpTime}`
 
-    command.value = rst
+    gCommand(rst)
+}
+function gCommand(cmd) {
+    if (Array.isArray(cmd)) {
+        cmd = cmd.join('\n')
+    }
 
-    commandHistory.value.push(rst)
+    command.value = cmd
+
+    commandHistory.value.push(cmd)
+}
+function exchangeSwitch() {
+    const [one, two] = mems.value.filter(i => i.checked)
+    gCommand([`sb init switch ${one.name} ${two.name}`,
+        `sb init switch ${two.name} ${one.name}`])
+}
+function delay() {
+    const [one, two] = mems.value.filter(i => i.checked)
+    gCommand([`sb member delay ${one.name} ${two.name}`,
+        `sb member delay ${two.name} ${one.name}`])
+}
+
+function allCheck() {
+    pcs.value.forEach(i => i.checked = true)
+    monsters.value.forEach(i => i.checked = true)
+}
+function allNotCheck() {
+    pcs.value.forEach(i => i.checked = false)
+    monsters.value.forEach(i => i.checked = false)
 }
 
 </script>
@@ -164,12 +188,15 @@ function gCommand() {
         </div>
         <div class="btn-group">
             <a-button @click="addMem" type="primary">参战</a-button>
+            <a-button @click="allCheck">全选</a-button>
+            <a-button @click="allNotCheck">全不选</a-button>
         </div>
     </section>
     <section class="run">
         <div class="mem">
             <a-form>
                 <a-form-item v-for="(m, i) in mems" :key="i">
+                    <div class="label"><b>{{m.name}}</b> <a-checkbox v-model:checked="m.checked" /></div>
                     血量: <a-input-number v-model:value="m.hp"></a-input-number>
                     先攻: <a-input-number v-model:value="m.init"></a-input-number> 
                     临时生命: <a-input-number v-model:value="m.temHp"></a-input-number> 
@@ -186,6 +213,8 @@ function gCommand() {
         </div>
         <div class="commander">
             <a-button @click="gCommand">生成命令</a-button>
+            <a-button @click="exchangeSwitch">交换先攻</a-button>
+            <a-button @click="delay">延迟</a-button>
             <div>
                 <a-checkbox v-model:checked="gOption.autoJump">自动跳过回合</a-checkbox>
                 <a-checkbox v-model:checked="gOption.autoReminder">自动提醒</a-checkbox>
