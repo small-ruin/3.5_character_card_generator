@@ -38,13 +38,14 @@ function loadMonsterFromLS() {
     return JSON.parse(localStorage.getItem('monster')) || []
 }
 function addPc(pc) {
+    if (!pc) return
     pcs.value.push(pc)
     const hpcs = loadPcFromLS()
     hpcs.push(pc)
-    hps = hps.filter(h => h)
     localStorage.setItem('pc', JSON.stringify(hpcs))
 }
 function addMonster(m) {
+    if (!m) return
     m.monster = true
     monsters.value.push(m)
     const hms = loadMonsterFromLS()
@@ -139,38 +140,43 @@ function gCommand() {
 <template>
 <div class="board">
     <section class="pool">
+        <a-textarea v-model:value="currentPc"></a-textarea>
         <div class="btn-group">
-            <a-textarea v-model:value="currentPc"></a-textarea>
             <a-button @click="createPc">导入人物卡</a-button>
             <a-button @click="createMonster">导入怪物卡</a-button>
         </div>
         <div class="pc">
+            人物卡区：
             <div v-for="pc in pcs" :key="pc.name">
                 <a-checkbox v-model:checked="pc.checked">{{pc.name}}</a-checkbox>
                 <a-button>删除</a-button>
             </div>
         </div>
         <div class="monster">
+            怪物区：
             <div v-for="m in monsters" :key="m.name">
                 <a-checkbox v-model:checked="m.checked">{{m.name}}</a-checkbox>
                 <a-button>删除</a-button>
             </div>
         </div>
+        <div class="btn-group">
+            <a-button @click="addMem" type="primary">参战</a-button>
+        </div>
     </section>
     <section class="run">
-        <div class="btn-group">
-            <a-button @click="addMem">参战</a-button>
-        </div>
         <div class="mem">
             <a-form>
                 <a-form-item v-for="(m, i) in mems" :key="i">
-                    <a-button @click="m.conditions.push({name: '', round: 0})">增加状态</a-button>
-                    <a-input-number v-model:value="m.hp"></a-input-number> 血量
-                    <a-input-number v-model:value="m.init"></a-input-number> 先攻
-                    <a-input-number v-model:value="m.temHp"></a-input-number> 临时生命
-                    <a-input-number v-model:value="m.nd"></a-input-number> 淤伤
-                    <a-input v-model:value="m.pc"></a-input> pc
-                    <div v-for="(c, i) in m.conditions" :key="i"><a-input v-model:value="c.name"></a-input> 状态 <a-input-number v-model:value="c.round"/> 轮数</div>
+                    血量: <a-input-number v-model:value="m.hp"></a-input-number>
+                    先攻: <a-input-number v-model:value="m.init"></a-input-number> 
+                    临时生命: <a-input-number v-model:value="m.temHp"></a-input-number> 
+                    淤伤: <a-input-number v-model:value="m.nd"></a-input-number> 
+                    pc: <a-input style="width:200px" v-model:value="m.pc"></a-input>
+                    <a-button style="margin-left: 10px" @click="m.conditions.push({name: '', round: 0})" type="primary">增加状态</a-button>
+                    <div style="margin: 10px 0" v-for="(c, i) in m.conditions" :key="i">
+                        状态: <a-input style="width:200px" v-model:value="c.name"></a-input>
+                        轮数: <a-input-number v-model:value="c.round"/>
+                    </div>
                 </a-form-item>
             </a-form>
         </div>
@@ -186,13 +192,44 @@ function gCommand() {
         </div>
     </section>
     <section class="result">
-        <a-button @click="leftTime = 5*60">下回合</a-button>
         <div class="timer">
             {{formatTime}}
         </div>
+        <a-button @click="leftTime = 5*60">下回合</a-button>
         <div class="log">
             <pre v-for="(c, i) in commandHistory" :key="i">{{c}}</pre>
         </div>
     </section>
 </div>
 </template>
+
+<style>
+.board {
+    display: flex;
+    padding: 10px;
+}
+.board > section {
+    min-width: 30vw;
+    min-height: calc(100vh - 20px);
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+    border-left: 1px solid #eee;
+}
+.board > section > div {
+    margin-bottom: 20px;
+}
+.btn-group {
+    margin: 10px 0;
+}
+.ant-btn {
+    margin-right: 10px
+}
+.board textarea.ant-input {
+    width: 30vw;
+    height: 30vh;
+}
+.timer {
+    font-size: 10rem;
+}
+</style>
