@@ -79,7 +79,6 @@ export default class Character {
     bab = 0
     ac = {
         armor: 0,
-        dex: 0,
         other: 0,
     }
     attacks = [{}]

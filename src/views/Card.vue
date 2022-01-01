@@ -86,7 +86,10 @@ const resetClassSkills = function() {
   nextTick(() => {
     classSkills.value = {}
     characterClasses.value.forEach(c => {
-      c.skills.forEach(s => !(s in classSkills.value) && (classSkills.value[s.name] = true))
+      c.skills.forEach(s => {
+        if (typeof s !== 'string') s = s.name
+        !(s in classSkills.value) && (classSkills.value[s] = true)
+      })
     })
   })
 }
@@ -117,7 +120,7 @@ const usedSkillPoints = computed(() => {
 
 const levelUpExp = computed(() => {
     const level = form.value.class.reduce((p, c) => c.level + p, 0)
-    return Math.round(500*level*level + 1500*level + 1000)
+    return Math.round(500*level*level + 500*level)
 })
 
 function handleSkillInputChange(p, skill) {
@@ -163,8 +166,8 @@ const weightDetail = computed(() => {
 const hitPoint = computed(() => {
   return (form.value.classHitPoint || 0) + form.value.CONSTITUTION.modify * level.value
 })
-const totalAc = computed(() => form.value.ac.armor + form.value.ac.dex + form.value.ac.other + 10)
-const touchAc = computed(() => form.value.ac.dex + 10)
+const totalAc = computed(() => form.value.ac.armor + form.value.DEXTERITY.modify + form.value.ac.other + 10)
+const touchAc = computed(() => form.value.DEXTERITY.modify + 10)
 const flatFootAc = computed(() => form.value.ac.armor + 10 + form.value.ac.other)
 const init = computed(() => form.value.otherInit + form.value.DEXTERITY.modify)
 const grab = computed(() => sizeModifyMap[form.value.size] * 4 + form.value.STRENGTH.modify + bab.value + form.value.otherGrab)
@@ -273,7 +276,7 @@ watchEffect(() => {
           <a-form-item label="ac">
             <span class="number__result">{{totalAc}}</span> = <span class="number__common">10</span>+
               <a-input-number v-model:value="form.ac.armor"></a-input-number>盔甲及盾牌+
-              <a-input-number v-model:value="form.ac.dex"></a-input-number>敏捷+
+              <span class="number__common">{{form.DEXTERITY.modify}}</span>敏捷+
               <a-input-number v-model:value="form.ac.other"></a-input-number>其它
               <br />
             接触：<span class="number__common">{{touchAc}}</span> 措手不及：<span class="number__common">{{flatFootAc}}</span>
