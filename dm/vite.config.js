@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [ vue() ],
   build: {
       rollupOptions: {
-          input: 'dm/main.js'
+          input: 'dm/index.html'
       }
   }
 })
