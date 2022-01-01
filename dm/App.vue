@@ -40,18 +40,21 @@ function loadMonsterFromLS() {
 function addPc(pc) {
     if (!pc) return
     pcs.value.push(pc)
-    const hpcs = loadPcFromLS()
-    hpcs.push(pc)
-    localStorage.setItem('pc', JSON.stringify(hpcs))
+    localStorage.setItem('pc', JSON.stringify(pcs.value))
+}
+function deletePc(i) {
+    pcs.value.splice(i, 1)
+    localStorage.setItem('pc', JSON.stringify(pcs.value))
 }
 function addMonster(m) {
     if (!m) return
     m.monster = true
     monsters.value.push(m)
-    const hms = loadMonsterFromLS()
-    hms.push(m)
-    hms = hms.filter(h => h)
-    localStorage.setItem('monster', JSON.stringify(hms))
+    localStorage.setItem('monster', JSON.stringify(monster.value))
+}
+function deleteMonster(i) {
+    monsters.value.splice(i, 1)
+    localStorage.setItem('monster', JSON.stringify(monster.value))
 }
 
 function importCard() {
@@ -146,17 +149,17 @@ function gCommand() {
             <a-button @click="createMonster">导入怪物卡</a-button>
         </div>
         <div class="pc">
-            人物卡区：
-            <div v-for="pc in pcs" :key="pc.name">
+            人物卡池：
+            <div v-for="(pc, i) in pcs" :key="pc.name">
                 <a-checkbox v-model:checked="pc.checked">{{pc.name}}</a-checkbox>
-                <a-button>删除</a-button>
+                <a-button @click="deletePc(i)" size="small">删除</a-button>
             </div>
         </div>
         <div class="monster">
-            怪物区：
-            <div v-for="m in monsters" :key="m.name">
+            怪物池：
+            <div v-for="(m, i) in monsters" :key="m.name">
                 <a-checkbox v-model:checked="m.checked">{{m.name}}</a-checkbox>
-                <a-button>删除</a-button>
+                <a-button @click="deleteMonster(i)" size="small">删除</a-button>
             </div>
         </div>
         <div class="btn-group">
@@ -176,6 +179,7 @@ function gCommand() {
                     <div style="margin: 10px 0" v-for="(c, i) in m.conditions" :key="i">
                         状态: <a-input style="width:200px" v-model:value="c.name"></a-input>
                         轮数: <a-input-number v-model:value="c.round"/>
+                        <a-button type="primary" style="margin-left: 10px" @click="m.conditions.splice(i, 1)">-</a-button>
                     </div>
                 </a-form-item>
             </a-form>
@@ -231,5 +235,10 @@ function gCommand() {
 }
 .timer {
     font-size: 10rem;
+}
+.log {
+    margin-top: 30px;
+    max-height: 600px;
+    overflow: auto;
 }
 </style>
