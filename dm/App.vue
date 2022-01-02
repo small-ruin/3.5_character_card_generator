@@ -85,7 +85,7 @@ function formatPc(pc) {
     return {
         name: pc.name,
         init: 0,
-        hp: pc.hp,
+        hp: pc.hitPoint,
         temHp: 0,
         nd: 0,
         pc: null,
