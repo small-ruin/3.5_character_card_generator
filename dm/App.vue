@@ -53,11 +53,11 @@ function addMonster(m) {
     if (!m) return
     m.monster = true
     monsters.value.push(m)
-    localStorage.setItem('monster', JSON.stringify(monster.value))
+    localStorage.setItem('monster', JSON.stringify(monsters.value))
 }
 function deleteMonster(i) {
     monsters.value.splice(i, 1)
-    localStorage.setItem('monster', JSON.stringify(monster.value))
+    localStorage.setItem('monster', JSON.stringify(monsters.value))
 }
 
 function importCard() {
