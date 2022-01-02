@@ -98,6 +98,17 @@ function formatPc(pc) {
 function addMem() {
     const toAddPcs = pcs.value.filter(p => p.checked).map(formatPc)
     const toAddMs = monsters.value.filter(m => m.checked).map(formatPc)
+    const memNames = mems.value.map(m => m.name)
+
+    const multiple = toAddMs.filter(mon => memNames.includes(mon.name))
+    multiple.forEach(mon => {
+        let n = 0;
+        const originName = mon.name
+        while(memNames.includes(mon.name)) {
+            mon.name = originName + ++n
+        }
+        memNames.push(mon.name)
+    })
     mems.value = [
         ...mems.value,
         ...toAddPcs,
