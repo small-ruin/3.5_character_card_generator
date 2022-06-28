@@ -152,11 +152,20 @@ autoIncrease(form.value.armors, 'name')
 
 const weightLimit = computed(() => getWeightByStr(form.value.STRENGTH.ability))
 const coinWeight = computed(() => ((form.value.pp + form.value.gp + form.value.sp + form.value.cp) / 50).toFixed(2))
-const weight = computed(() => (
-  form.value.items.reduce((p, c) => p +
-    +(c.weight * c.count || 0), 0) +
-    +coinWeight.value).toFixed(2)
-)
+const weight = computed(() => {
+  let armorsWeight = 0, itemWeight = +coinWeight.value
+  
+  form.value.items.forEach(i => {
+    const iWeight = i.weight * i.count || 0
+    if (form.value.armors.find(a => a.name === i.name)) {
+      armorsWeight += iWeight
+    } else {
+      itemWeight += iWeight
+    }
+  })
+  console.log('armors',armorsWeight, 'item', itemWeight)
+  return armorsWeight > itemWeight ? armorsWeight : itemWeight
+})
 const weightDetail = computed(() => {
   if (weight.value < weightLimit.value[0]) return '轻载'
   else if (weight.value <= weightLimit.value[1]) return '中载'

@@ -1,3 +1,4 @@
+import { isObject } from '@vue/shared'
 import { Abilities, alignMap, sizeMap, canUseUntrainedSkills, allSkillsMap } from '.'
 import { allSkills } from './Class'
 
@@ -154,6 +155,15 @@ export default class Character {
             o[n] = new Ability(n)
             o[n].inject(origin)
         })
-        Object.assign(this, o)
+        function deepClone(origin, n) {
+            Object.keys(n).forEach(k => {
+                if (isObject(n[k]) && origin[k]) {
+                    deepClone(origin[k], n[k])
+                } else {
+                    origin[k] = n[k]
+                }
+            })
+        }
+        deepClone(this, o)
     }
 }
