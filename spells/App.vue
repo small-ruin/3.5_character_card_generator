@@ -54,7 +54,7 @@ function onSearch(v = "") {
 }
 function getSpellByKW(kw) {
   return allSpellNames.find(
-    (n) => n.value.toLowerCase().indexOf(keyword.value.toLowerCase()) !== -1
+    (n) => n.value.toLowerCase().indexOf(kw.toLowerCase()) !== -1
   ).value;
 }
 </script>
